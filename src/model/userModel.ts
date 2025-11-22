@@ -5,3 +5,9 @@ export enum Role {
     VENDOR = "VENDOR",
     USER = "USER"
 }
+
+export enum Status {
+    PENDING = "PENDING",
+    APPROVED = "APPROVED",
+    REJECTED = "REJECTED"
+}
