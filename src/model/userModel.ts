@@ -1,4 +1,3 @@
-import { timeStamp } from "console";
 import mongoose, { Document, Schema } from "mongoose";
 
 export enum Role {
@@ -13,6 +12,7 @@ export enum Status {
     REJECTED = "REJECTED"
 }
 
+// TypeScript structure
 export interface IUser extends Document {
     _id: mongoose.Types.ObjectId
     fullname: string
@@ -24,6 +24,7 @@ export interface IUser extends Document {
     approved: Status
 }
 
+// Database structure
 const userSchema = new Schema<IUser>(
     {
         fullname: { type: String, required: true },
@@ -36,3 +37,5 @@ const userSchema = new Schema<IUser>(
     },
     { timestamps: true }
 )
+
+export const User = mongoose.model<IUser>("User", userSchema)
