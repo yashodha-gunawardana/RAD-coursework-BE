@@ -16,7 +16,8 @@ export const signAccessToken = (user: IUser): string => {
 
             // `roles` stores the user's roles for access control
             roles: user.roles
-        }
+        },
+        JWT_SECRET,
     )
 
 }
