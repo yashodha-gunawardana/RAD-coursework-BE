@@ -78,6 +78,9 @@ export const loginUser = async (req: Request, res: Response) => {
                 message: "Invalid credentials.."
             })
         }
+
+        // compare the entered passsword with the stored hashed password
+        const valid = await bcrypt.compare(password, existingUser.password)
     } catch (err) {
 
     }
