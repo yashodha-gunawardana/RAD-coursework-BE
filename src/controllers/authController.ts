@@ -29,7 +29,18 @@ export const registerUser = async (req: Request, res: Response) => {
 
         const hashedPassowrd = await bcrypt.hash(password, 10);
 
-        const approvelStatus = role == Role.VENDOR ? Status.PENDING : Status.APPROVED
+        // vendor needs a admin approval
+        const approvelStatus = role == Role.VENDOR ? Status.PENDING : Status.APPROVED;
+
+        const newUser = new User({
+            fullname,
+            email,
+            password: hashedPassowrd,
+            address,
+            phone,
+            roles: [role],
+            approved: approvelStatus
+        })
     } catch (err) {
 
     }
