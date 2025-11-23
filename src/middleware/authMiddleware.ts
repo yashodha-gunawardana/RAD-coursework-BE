@@ -26,4 +26,9 @@ export const authenticate = (
     }
 
     const token = authHeader.split(" ")[1] 
+    try {
+        const payload = jwt.verify(token, JWT_SECRET)
+    } catch (err) {
+
+    }
 }
