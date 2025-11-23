@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "../model/userModel";
+import { Role, User } from "../model/userModel";
 
 
 export const registerUser = async (req: Request, res: Response) => {
@@ -9,6 +9,12 @@ export const registerUser = async (req: Request, res: Response) => {
         if (!fullname || !email || !password || !address || !phone || role) {
             return res.status(400).json({
                 message: "All fields are required.."
+            })
+        }
+
+        if (role !== Role.USER && role !== Role.VENDOR) {
+            return res.status(400).json({
+                message: "Invalid role.."
             })
         }
     } catch (err) {
