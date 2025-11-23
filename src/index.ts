@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import AuthRoutes from "./routes/authRoutes";
 
 dotenv.config();
 
@@ -12,6 +13,8 @@ const app = express();
 // json data parse in incoming requests
 app.use(express.json());
 
+// mount routes
+app.use("/api/v1/auth", AuthRoutes)
 
 mongoose.connect(MONGO_URL).then(() => {
     console.log("Database connected..")
