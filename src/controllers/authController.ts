@@ -87,6 +87,9 @@ export const loginUser = async (req: Request, res: Response) => {
                 message: "Invalid credentials.."
             })
         }
+
+        // generate JWT access token for the authenticated user
+        const accessToken = signAccessToken(existingUser)
     } catch (err) {
 
     }
