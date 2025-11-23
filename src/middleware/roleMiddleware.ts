@@ -17,6 +17,12 @@ export const requiredRole = (roles: Role[]) => {
         // check if user has at least one required role
         // some() checks if any role of the user matches allowed roles
         const hashRole = req.user.roles?.some((r: Role) => roles.includes(r))
+
+        if (!hashRole) {
+            return res.status(403).json({
+                message: `Require ${roles.join(", ")} role`
+            })
+        }
     }    
     
     
