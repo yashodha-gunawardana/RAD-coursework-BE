@@ -7,6 +7,12 @@ import { AuthRequest } from "./authMiddleware";
 export const requiredRole = (roles: Role[]) => {
     return (req: AuthRequest, res: Response, next: NextFunction) => {
 
+        // check if user is logged in
+        if (!req.user) {
+            return res.status(401).json({
+                message: "Unauthorized.."
+            })
+        }
     }    
     
     
