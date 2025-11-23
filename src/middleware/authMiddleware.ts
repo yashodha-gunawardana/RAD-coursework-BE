@@ -29,6 +29,7 @@ export const authenticate = (
     try {
         const payload = jwt.verify(token, JWT_SECRET)
         req.user = payload
+        next()
     } catch (err) {
 
     }
