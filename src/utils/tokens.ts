@@ -18,6 +18,10 @@ export const signAccessToken = (user: IUser): string => {
             roles: user.roles
         },
         JWT_SECRET,
+
+        {
+            expiresIn: "30m"
+        }
     )
 
 }
