@@ -9,3 +9,8 @@ const JWT_SECRET = process.env.JWT_SECRET as string;
 export interface AuthRequest extends Request {
     user?: any
 }
+
+// midlleware function to authenticate requests
+export const authenticate = (
+
+)
