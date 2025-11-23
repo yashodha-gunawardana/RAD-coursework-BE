@@ -22,3 +22,15 @@ export interface IUser extends Document {
     roles: Role[]  // array of roles assigned to user
     approved: Status
 }
+
+const userSchema = new Schema<IUser>(
+    {
+        fullname: { type: String, required: true },
+        email: { type: String, unique: true, lowercase: true },
+        password: { type: String, required: true },
+        address: { type: String, required: true },
+        phone: { type: String, required: true },
+        roles: { type: [String], enum: Object.values(Role), default: [Role.USER] },
+        approved: { type: String, enum: Object.values(Status), default: Status.PENDING }
+    }
+)
