@@ -1,3 +1,4 @@
+import { timeStamp } from "console";
 import mongoose, { Document, Schema } from "mongoose";
 
 export enum Role {
@@ -32,5 +33,6 @@ const userSchema = new Schema<IUser>(
         phone: { type: String, required: true },
         roles: { type: [String], enum: Object.values(Role), default: [Role.USER] },
         approved: { type: String, enum: Object.values(Status), default: Status.PENDING }
-    }
+    },
+    { timestamps: true }
 )
