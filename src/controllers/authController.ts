@@ -108,3 +108,9 @@ export const loginUser = async (req: Request, res: Response) => {
 }
 
 
+// get own details function
+export const getMyDetails = async (req: Request, res: Response) => {
+    
+}
+
+
