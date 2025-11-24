@@ -128,6 +128,8 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
             message: "User not found.."
         })
     }
+
+    const { fullname, email, address, phone, roles, approved } = user
 }
 
 
