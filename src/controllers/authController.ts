@@ -3,6 +3,7 @@ import { Role, User, Status, IUser } from "../model/userModel";
 import bcrypt from "bcryptjs";
 import { signAccessToken } from "../utils/tokens";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { data } from "react-router-dom";
 
 // register user function
 export const registerUser = async (req: Request, res: Response) => {
@@ -129,7 +130,13 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
         })
     }
 
+    // extract only safe fields to send frontend
     const { fullname, email, address, phone, roles, approved } = user
+
+    res.status(200).json({
+        message: "OK..",
+        data: { fullname, email, address, phone, roles, approved }
+    })
 }
 
 
