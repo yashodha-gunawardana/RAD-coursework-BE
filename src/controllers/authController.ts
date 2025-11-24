@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Role, User, Status } from "../model/userModel";
+import { Role, User, Status, IUser } from "../model/userModel";
 import bcrypt from "bcryptjs";
 import { signAccessToken } from "../utils/tokens";
 import { AuthRequest } from "../middleware/authMiddleware";
@@ -117,7 +117,10 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
         })
     }
 
+    // get user id from JWT payload
     const userId = req.user.sub
+
+    const user = ((await User.findById(userId).select("-password")) as IUser) || null
 }
 
 
