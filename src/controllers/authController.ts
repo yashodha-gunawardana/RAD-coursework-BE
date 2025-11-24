@@ -116,6 +116,8 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
             message: "Unauthorized.."
         })
     }
+
+    const userId = req.user.sub
 }
 
 
