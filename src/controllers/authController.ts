@@ -120,7 +120,14 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
     // get user id from JWT payload
     const userId = req.user.sub
 
+    // find user in database using ID and exclude password field
     const user = ((await User.findById(userId).select("-password")) as IUser) || null
+
+    if (!user) {
+        return res.status(404).json({
+            message: "User not found.."
+        })
+    }
 }
 
 
