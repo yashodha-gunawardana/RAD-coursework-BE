@@ -1,4 +1,4 @@
-import mongoose, { Document } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
 
 export enum Type {
     WEDDING = "WEDDING",
@@ -28,3 +28,7 @@ export interface IEvent extends Document {
     status: Status
     createdAt: Date
 }
+
+const eventSchema = new Schema<IEvent> (
+    
+)
