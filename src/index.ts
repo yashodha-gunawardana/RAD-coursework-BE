@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import AuthRoutes from "./routes/authRoutes";
 import cors from "cors";
+import EventRoutes from "./routes/eventRoutes";
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(cors({
 
 // mount routes
 app.use("/api/v1/auth", AuthRoutes)
+app.use("/api/events", EventRoutes)
 
 mongoose.connect(MONGO_URL).then(() => {
     console.log("Database connected..")
