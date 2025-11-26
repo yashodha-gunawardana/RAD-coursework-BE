@@ -92,6 +92,15 @@ export const deleteEvent = async (req: Request, res: Response) => {
     try {
         const deletedEvent = await Event.findByIdAndDelete(req.params.id)
 
+        if (!deletedEvent) {
+            return res.status(404).json({
+                message: "Event not found.."
+            })
+        }
+        res.status(200).json({
+            message: "Event deleted successfully.."
+        })
+
     } catch (err) {
 
     }
