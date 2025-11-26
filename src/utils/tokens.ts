@@ -6,7 +6,6 @@ import dotenv from "dotenv";
 dotenv.config()
 
 const JWT_SECRET = process.env.JWT_SECRET as string
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
 
 // generate a JSON web token for a given user
 export const signAccessToken = (user: IUser): string => {
@@ -25,6 +24,8 @@ export const signAccessToken = (user: IUser): string => {
         }
     )
 }
+
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
 
 // function to sign a new refresh token
 export const signRefreshToken = (user: IUser): string => {

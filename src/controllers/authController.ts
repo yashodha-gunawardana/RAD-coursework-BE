@@ -12,9 +12,9 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
 // register user function
 export const registerUser = async (req: Request, res: Response) => {
     try {
-        const { fullname, email, password, address, phone, role} = req.body;
+        const { fullname, email, password, role} = req.body;
 
-        if (!fullname || !email || !password || !address || !phone) {
+        if (!fullname || !email || !password || !role) {
             return res.status(400).json({
                 message: "All fields are required.."
             })
@@ -43,8 +43,8 @@ export const registerUser = async (req: Request, res: Response) => {
             fullname,
             email,
             password: hashedPassowrd,
-            address,
-            phone,
+            // address,
+            // phone,
             roles: [role],
             approved: approvelStatus
         })
@@ -135,17 +135,17 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
     }
 
     // extract only safe fields to send frontend
-    const { fullname, email, address, phone, roles, approved } = user
+    const { fullname, email, roles, approved } = user
 
     res.status(200).json({
         message: "OK..",
-        data: { fullname, email, address, phone, roles, approved }
+        data: { fullname, email, roles, approved }
     })
 }
 
 
 // refresh token & generate a new access token function
-export const handleRefreshToken = async (req: Request, res: Response) => {
+export const handleRefreshToken = async (req: AuthRequest, res: Response) => {
     try {
         // get the refresh token sent by the client
         const { token } = req.body
