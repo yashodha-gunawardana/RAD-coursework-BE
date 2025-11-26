@@ -3,7 +3,11 @@ import { Role, User, Status, IUser } from "../model/userModel";
 import bcrypt from "bcryptjs";
 import { signAccessToken } from "../utils/tokens";
 import { AuthRequest } from "../middleware/authMiddleware";
-import { data } from "react-router-dom";
+import jwt from "jsonwebtoken";
+
+
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
+
 
 // register user function
 export const registerUser = async (req: Request, res: Response) => {
@@ -152,7 +156,12 @@ export const handleRefreshToken = async (req: Request, res: Response) => {
             })
         }
 
+        // Verify the token using JWT_REFRESH_SECRET
+        // jwt.verify will decode the token and check its validity
         const payload = jwt.verify(token, JWT_REFRESH_SECRET)
+
+         // Find user in database by ID from token payload
+        const user = await User.findById(payload.sub)
 
     } catch (err) {
 
