@@ -6,6 +6,7 @@ export const createEvent = async (req: Request, res: Response) => {
     try {
         const { userId, title, type, date, time, location, description, image } = req.body
 
+        // new Event object based on req data
         const newEvent = new Event({
             userId,
             title,
@@ -17,6 +18,7 @@ export const createEvent = async (req: Request, res: Response) => {
             image,
             status: Status.PLANNING,
         })
+        await newEvent.save()
 
        
     } catch (err) {
