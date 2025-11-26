@@ -177,7 +177,9 @@ export const handleRefreshToken = async (req: Request, res: Response) => {
         })
 
     } catch (err) {
-
+        res.status(403).json({
+            message: "Invalid or expired token.."
+        })
     }
 }
 
