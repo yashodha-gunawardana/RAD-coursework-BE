@@ -8,3 +8,10 @@ export enum Type {
     PARTY = "PARTY",
     OTHER = "OTHER"
 }
+
+export enum Status {
+    PLANNING = "PLANNING",
+    ONGOING = "ONGOING",
+    COMPLETED = "COMPLETED",
+    CANCELLED = "CANCELLED"
+}
