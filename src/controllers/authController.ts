@@ -152,6 +152,8 @@ export const handleRefreshToken = async (req: Request, res: Response) => {
             })
         }
 
+        const payload = jwt.verify(token, JWT_REFRESH_SECRET)
+
     } catch (err) {
 
     }
