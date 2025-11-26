@@ -66,3 +66,8 @@ export const getEventById = async (req: Request, res: Response) => {
 
     }
 }
+
+// update event function
+export const updateEvent = async (req: Request, res: Response) => {
+    
+}
