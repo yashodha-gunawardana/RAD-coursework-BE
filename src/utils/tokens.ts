@@ -29,6 +29,8 @@ export const signAccessToken = (user: IUser): string => {
 // function to sign a new refresh token
 export const signRefreshToken = (user: IUser): string => {
     return jwt.sign(
-        
+        {
+            sub: user._id.toString(),
+        }
     )
 }
