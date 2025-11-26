@@ -41,6 +41,6 @@ const eventSchema = new Schema<IEvent> (
         image: { type: String },
         status: { type: String, enum: Object.values(Status), default: Status.PLANNING }
     },
-    
+    { timestamps: true }
 
 )
