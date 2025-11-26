@@ -48,5 +48,11 @@ export const getEvents = async (req: Request, res: Response) => {
 
 // get event by id function
 export const getEventById = async (req: Request, res: Response) => {
-    
+    try {
+        // retrieve event using id from url paramaeter
+        const event = await Event.findById(req.params.id)
+
+    } catch (err) {
+
+    }
 }
