@@ -33,5 +33,9 @@ export const createEvent = async (req: Request, res: Response) => {
 
 // get all events function
 export const getEvents = async (req: Request, res: Response) => {
-    
+    try {
+        const events = await Event.find()
+    } catch (err) {
+
+    }
 }
