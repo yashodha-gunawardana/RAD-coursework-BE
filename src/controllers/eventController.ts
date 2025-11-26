@@ -52,6 +52,13 @@ export const getEventById = async (req: Request, res: Response) => {
         // retrieve event using id from url paramaeter
         const event = await Event.findById(req.params.id)
 
+        if (!event) {
+            return res.status(404).json({
+                message: "Event not found.."
+            })
+        }
+        res.status(200).json(event)
+
     } catch (err) {
 
     }
