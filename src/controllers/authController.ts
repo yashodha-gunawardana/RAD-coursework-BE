@@ -169,6 +169,9 @@ export const handleRefreshToken = async (req: Request, res: Response) => {
             })
         }
 
+        // generate a new access token 
+        const accessToken = signAccessToken(user)
+
     } catch (err) {
 
     }
