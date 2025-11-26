@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import Event, { IEvent, Status } from "../model/eventModel";
 
-
+// create new event function
 export const createEvent = async (req: Request, res: Response) => {
     try {
         const { userId, title, type, date, time, location, description, image } = req.body
@@ -20,8 +20,13 @@ export const createEvent = async (req: Request, res: Response) => {
         })
         await newEvent.save()
 
-       
-    } catch (err) {
+        res.status(201).json({
+            message: "Event created successfully.."
+        })
 
+    } catch (err: any) {
+        res.status(500).json({
+            message: err?.message
+        })
     }
 }
