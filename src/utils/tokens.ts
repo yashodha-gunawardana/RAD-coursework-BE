@@ -30,7 +30,13 @@ export const signAccessToken = (user: IUser): string => {
 export const signRefreshToken = (user: IUser): string => {
     return jwt.sign(
         {
+            // set the 'sub' (subject) claim to user's ID as string
             sub: user._id.toString(),
+        },
+        JWT_REFRESH_SECRET, // use the refresh token secret for signing
+
+        {
+            expiresIn: "7d"
         }
     )
 }
