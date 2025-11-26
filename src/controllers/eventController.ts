@@ -72,6 +72,13 @@ export const updateEvent = async (req: Request, res: Response) => {
     try {
         const updateEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true })
 
+        if (!updateEvent) {
+            return res.status(404).json({
+                message: "Event not found.."
+            })
+        }
+        res.status(200).json(updateEvent)
+
     } catch (err) {
 
     }
