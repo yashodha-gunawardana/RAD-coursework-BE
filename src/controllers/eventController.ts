@@ -1,14 +1,16 @@
 import { Request, Response } from "express";
 import Event, { IEvent, Status } from "../model/eventModel";
+import { AuthRequest } from "../middleware/authMiddleware";
+
 
 // create new event function
-export const createEvent = async (req: Request, res: Response) => {
+export const createEvent = async (req: AuthRequest, res: Response) => {
     try {
-        const { userId, title, type, date, time, location, description, image } = req.body
+        const { title, type, date, time, location, description, image } = req.body
 
         // new Event object based on req data
         const newEvent = new Event({
-            userId,
+            userId: req.user._id,
             title,
             type,
             date,
@@ -21,7 +23,8 @@ export const createEvent = async (req: Request, res: Response) => {
         await newEvent.save()
 
         res.status(201).json({
-            message: "Event created successfully.."
+            message: "Event created successfully..",
+            event: newEvent
         })
 
     } catch (err: any) {
@@ -70,14 +73,14 @@ export const getEventById = async (req: Request, res: Response) => {
 // update event function
 export const updateEvent = async (req: Request, res: Response) => {
     try {
-        const updateEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true })
 
-        if (!updateEvent) {
+        if (!updatedEvent) {
             return res.status(404).json({
                 message: "Event not found.."
             })
         }
-        res.status(200).json(updateEvent)
+        res.status(200).json(updatedEvent)
 
     } catch (err: any) {
         res.status(500).json({
