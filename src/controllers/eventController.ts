@@ -10,7 +10,7 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
 
         // new Event object based on req data
         const newEvent = new Event({
-            userId: req.user._id,
+            userId: req.user._id, // userId comes from logged-in user (JWT)
             title,
             type,
             date,
@@ -35,10 +35,10 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
 }
 
 // get all events function
-export const getEvents = async (req: Request, res: Response) => {
+export const getEvents = async (req: AuthRequest, res: Response) => {
     try {
         // fetch all event records from db
-        const events = await Event.find()
+        const events = await Event.find({ userId: req.user._id }).sort({ date: -1 })
         res.status(200).json(events)
 
     } catch (err: any) {
