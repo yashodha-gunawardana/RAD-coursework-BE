@@ -49,7 +49,7 @@ export const getEvents = async (req: AuthRequest, res: Response) => {
     }
 }
 
-// get event by id function (user, or admin)
+// get event by id function (user or admin)
 export const getEventById = async (req: AuthRequest, res: Response) => {
     try {
         // retrieve event using id from url paramaeter
@@ -69,7 +69,7 @@ export const getEventById = async (req: AuthRequest, res: Response) => {
             res.status(403)
             throw new Error("Not authorized to access this event..")
         }
-        
+
         res.status(200).json(event)
 
     } catch (err: any) {
@@ -80,9 +80,16 @@ export const getEventById = async (req: AuthRequest, res: Response) => {
     }
 }
 
-// update event function
-export const updateEvent = async (req: Request, res: Response) => {
+// update event function (user or admin)
+export const updateEvent = async (req: AuthRequest, res: Response) => {
     try {
+        const event = await Event.findById(req.params.id)
+        
+        if (!event) {
+            return res.status(404).json({
+                message: "Event not found.."
+            })
+        }
         const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true })
 
         if (!updatedEvent) {
