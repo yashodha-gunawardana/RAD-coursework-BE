@@ -64,6 +64,12 @@ export const getEventById = async (req: AuthRequest, res: Response) => {
         const isOwner = event.userId.toString() === req.user._id.toString()
 
         const isAdmin = req.user.roles?.includes("admin")
+
+        if (!isOwner && !isAdmin) {
+            res.status(403)
+            throw new Error("Not authorized to access this event..")
+        }
+        
         res.status(200).json(event)
 
     } catch (err: any) {
