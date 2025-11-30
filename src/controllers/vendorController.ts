@@ -35,6 +35,19 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
             })
         }
 
+        const newVendor = new Vendor({
+            name,
+            category,
+            contact,
+            priceRange,
+            description,
+            image,
+            addedBy: req.user._id // track which admin added the vendor
+        })
+        await newVendor.save()
+
+        
+
     } catch (err) {
 
     }
