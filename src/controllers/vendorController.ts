@@ -29,6 +29,10 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
     try {
         const { name, category, contact, priceRange, description, image } = req.body
 
+        if (!req.user?.roles?.includes("admin")) {
+            
+        }
+
     } catch (err) {
 
     }
