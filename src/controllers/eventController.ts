@@ -35,7 +35,7 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
 }
 
 // get all events function
-export const getEvents = async (req: AuthRequest, res: Response) => {
+export const getMyEvents = async (req: AuthRequest, res: Response) => {
     try {
         // fetch all event records from db
         const events = await Event.find({ userId: req.user._id }).sort({ date: -1 })
@@ -62,15 +62,18 @@ export const getEventById = async (req: AuthRequest, res: Response) => {
         }
 
         const isOwner = event.userId.toString() === req.user._id.toString()
-
         const isAdmin = req.user.roles?.includes("admin")
 
         if (!isOwner && !isAdmin) {
-            res.status(403)
-            throw new Error("Not authorized to access this event..")
+            res.status(403).json({
+                message: "Not authorized to access this event.."
+            })
         }
 
-        res.status(200).json(event)
+        res.status(200).json({
+            success: true,
+            data: event
+        })
 
     } catch (err: any) {
         res.status(500).json({
@@ -93,14 +96,19 @@ export const updateEvent = async (req: AuthRequest, res: Response) => {
 
         const isOwner = event.userId.toString() === req.user._id.toString()
         const isAdmin = req.user.roles?.includes("admin")
-        const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true })
 
-        if (!updatedEvent) {
-            return res.status(404).json({
-                message: "Event not found.."
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({
+                message: "Not authorized to update this event.."
             })
         }
-        res.status(200).json(updatedEvent)
+
+        const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true })
+
+        res.status(200).json({
+            success: true,
+            data: updatedEvent
+        })
 
     } catch (err: any) {
         res.status(500).json({
@@ -110,17 +118,30 @@ export const updateEvent = async (req: AuthRequest, res: Response) => {
     }
 }
 
-// delete event function
-export const deleteEvent = async (req: Request, res: Response) => {
+// delete event function (user or admin)
+export const deleteEvent = async (req: AuthRequest, res: Response) => {
     try {
-        const deletedEvent = await Event.findByIdAndDelete(req.params.id)
+        const event = await Event.findById(req.params.id)
 
-        if (!deletedEvent) {
+        if (!event) {
             return res.status(404).json({
                 message: "Event not found.."
-            })
+            });
         }
+
+        const isOwner = event.userId.toString() === req.user._id.toString()
+        const isAdmin = req.user.roles?.includes("admin")
+
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({
+                message: "Not authorized to delete this event"
+            });
+        }
+
+        await event.deleteOne()
+
         res.status(200).json({
+            success: true,
             message: "Event deleted successfully.."
         })
 

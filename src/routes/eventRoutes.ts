@@ -1,12 +1,16 @@
 import { Router } from "express";
-import { createEvent, getEvents, getEventById, updateEvent, deleteEvent } from "../controllers/eventController";
+import { createEvent, getMyEvents, getEventById, updateEvent, deleteEvent } from "../controllers/eventController";
+import { authenticate } from "../middleware/authMiddleware";
+import { requiredRole } from "../middleware/roleMiddleware";
+import { Role } from "../model/userModel";
 
 const router = Router();
 
-router.post("/", createEvent)
-router.get("/", getEvents)
-router.get("/:id", getEventById)
-router.put("/:id", updateEvent)
-router.delete("/:id", deleteEvent)
+router
+    .route("/")
+    .post(authenticate, createEvent)
+    .get(authenticate, getMyEvents)
+
+
 
 export default router
