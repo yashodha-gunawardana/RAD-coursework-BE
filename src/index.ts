@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import AuthRoutes from "./routes/authRoutes";
 import cors from "cors";
 import EventRoutes from "./routes/eventRoutes";
+import VendorRoutes from "./routes/vendorRoutes";
 
 dotenv.config();
 
