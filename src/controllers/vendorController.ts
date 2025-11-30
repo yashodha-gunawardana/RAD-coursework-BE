@@ -90,5 +90,15 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
 
 // delete vendor function (only admin)
 export const deleteVendor = async (req: AuthRequest, res: Response) => {
-    
+    try {
+
+        if (!req.user?.roles?.includes("admin")) {
+            return res.status(403).json({
+                message: "Only admin can delete vendors.."
+            })
+        }
+
+    } catch (err) {
+
+    }
 }
