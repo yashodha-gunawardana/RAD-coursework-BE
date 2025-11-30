@@ -86,3 +86,9 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
 
     }
 }
+
+
+// delete vendor function (only admin)
+export const deleteVendor = async (req: AuthRequest, res: Response) => {
+    
+}
