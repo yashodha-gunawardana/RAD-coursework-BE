@@ -100,6 +100,12 @@ export const deleteVendor = async (req: AuthRequest, res: Response) => {
 
         const vendor = await Vendor.findById(req.params.id)
 
+        if (!vendor) {
+            return res.status(404).json({
+                message: "Vendor not found.."
+            })
+        }
+
     } catch (err) {
 
     }
