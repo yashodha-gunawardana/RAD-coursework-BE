@@ -16,7 +16,9 @@ export const getAllVendors = async (req: Request, res: Response) => {
             data: vendors
         })    
 
-    } catch (err) {
-
+    } catch (err: any) {
+        return res.status(500).json({
+            message: err?.message
+        })
     }
 }
