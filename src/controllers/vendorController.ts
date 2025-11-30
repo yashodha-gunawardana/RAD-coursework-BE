@@ -7,6 +7,7 @@ import { AuthRequest } from "../middleware/authMiddleware";
 export const getAllVendors = async (req: Request, res: Response) => {
     try {
         const vendors = await Vendor.find({ isAvailable: true })
+            .select("-addedBy")
 
     } catch (err) {
 
