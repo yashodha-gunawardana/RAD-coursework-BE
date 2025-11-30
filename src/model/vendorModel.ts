@@ -19,5 +19,5 @@ export interface IVendor extends Document {
     description?: string
     image?: string
     isAvailable: boolean
-    
+    addedBy: mongoose.Types.ObjectId
 }
