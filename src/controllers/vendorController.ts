@@ -71,6 +71,12 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
 
         const vendor = await Vendor.findByIdAndUpdate(req.params.id, req.body, { new: true })
 
+        if (!vendor) {
+            return res.status(404).json({
+                message: "Vendor not found.."
+            })
+        }
+
     } catch (err) {
 
     }
