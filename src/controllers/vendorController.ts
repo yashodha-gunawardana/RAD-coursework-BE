@@ -5,5 +5,10 @@ import { AuthRequest } from "../middleware/authMiddleware";
 
 // get all vendors function (anyone)
 export const getAllVendors = async (req: Request, res: Response) => {
-    
+    try {
+        const vendors = await Vendor.find({ isAvailable: true })
+
+    } catch (err) {
+
+    }
 }
