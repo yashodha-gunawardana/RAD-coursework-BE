@@ -35,3 +35,5 @@ const vendorSchema = new Schema<IVendor> (
     },
     { timestamps: true }
 )
+
+export default mongoose.model<IVendor>("Vendor", vendorSchema)
