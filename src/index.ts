@@ -25,6 +25,7 @@ app.use(cors({
 // mount routes
 app.use("/api/v1/auth", AuthRoutes)
 app.use("/api/events", EventRoutes)
+app.use("/api/vendors", VendorRoutes)
 
 mongoose.connect(MONGO_URL).then(() => {
     console.log("Database connected..")
