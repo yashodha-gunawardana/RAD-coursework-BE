@@ -108,6 +108,10 @@ export const deleteVendor = async (req: AuthRequest, res: Response) => {
         
         await Vendor.deleteOne()
 
+        return res.status(201).json({
+            message: "Vendor deleted successfully.."
+        })
+
     } catch (err) {
 
     }
