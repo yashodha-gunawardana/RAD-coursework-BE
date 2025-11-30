@@ -12,3 +12,5 @@ router.get("/", getAllVendors)
 router.post("/", authenticate, requiredRole([Role.ADMIN]), createVendor)
 
 router.put("/:id", authenticate, requiredRole([Role.ADMIN]), updateVendor)
+
+router.delete("/:id", authenticate, requiredRole([Role.ADMIN]), deleteVendor)
