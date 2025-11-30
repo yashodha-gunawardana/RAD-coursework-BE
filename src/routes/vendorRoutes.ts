@@ -9,3 +9,4 @@ const router = Router();
 
 router.get("/", getAllVendors)
 
+router.post("/", authenticate, requiredRole([Role.ADMIN]), createVendor)
