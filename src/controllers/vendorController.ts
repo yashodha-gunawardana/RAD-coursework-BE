@@ -30,7 +30,9 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
         const { name, category, contact, priceRange, description, image } = req.body
 
         if (!req.user?.roles?.includes("admin")) {
-            
+            return res.status(403).json({
+                message: "Only admin can add vendors.."
+            })
         }
 
     } catch (err) {
