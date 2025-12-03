@@ -16,7 +16,15 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
                 message: "Event not found or not owned by you.."
             })
         }
-        
+
+        const newBokking = new Booking ({
+            eventId,
+            vendorId,
+            userId: req.user._id,
+            notes
+        })
+        await newBokking.save()
+
     } catch (err) {
 
     }
