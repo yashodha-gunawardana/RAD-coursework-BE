@@ -46,5 +46,10 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
 
 // get own booking function 
 export const getMyBooking = async (req: AuthRequest, res: Response) => {
-    
+    try {
+        const booking = await Booking.findOne({ userId: req.user._id })
+
+    } catch (err) {
+
+    }
 }
