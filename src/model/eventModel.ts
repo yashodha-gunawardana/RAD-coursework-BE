@@ -30,7 +30,7 @@ export interface IEvent extends Document {
     createdAt: Date
 }
 
-// database structure for event
+// Database structure for event
 const eventSchema = new Schema<IEvent> (
     {
         userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },

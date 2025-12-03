@@ -16,3 +16,15 @@ export interface IBooking extends Document {
     bookedAt: Date
     notes?: string
 }
+
+// Database structure
+const bookingSchema = new Schema<IBooking> (
+    {
+        eventId: { type: Schema.Types.ObjectId, ref: "Event", required: true },
+        vendorId: { type: Schema.Types.ObjectId, ref: "Vendor", required: true },
+        userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+        status: { type: String, enum: Object.values(BookingStatus), default: BookingStatus.PENDING },
+        notes: String
+    },
+    
+)
