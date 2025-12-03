@@ -101,6 +101,16 @@ export const deleteBooking = async (req: AuthRequest, res: Response) => {
 
         const deleted = await Booking.findByIdAndDelete({ _id: id, userId: req.user._id })
 
+        if (!deleted) {
+            return res.status(404).json({
+                message: "Booking not found.."
+            })
+        }
+
+        return res.status(200).json({
+            message: "Booking deleted successfully.."
+        })
+
     } catch (err) {
 
     }
