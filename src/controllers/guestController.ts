@@ -58,6 +58,14 @@ export const getGuestByEvent = async (req: Request, res: Response) => {
 
         const guests = await Guest.find({ eventId }).sort({ createdAt: -1 })
 
+        const stats = {
+            total: guests.length,
+            going: guests.filter(g => g.rsvpStatus === "GOING").length,
+            notGoing: guests.filter(g => g.rsvpStatus === "NOT_GOING").length,
+            maybe: guests.filter(g => g.rsvpStatus === "MAYBE").length,
+            pending: guests.filter(g => g.rsvpStatus === "PENDING").length
+        }
+
     } catch (err) {
 
     }
