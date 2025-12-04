@@ -81,6 +81,11 @@ export const getBookingById = async (req: AuthRequest, res: Response) => {
                 message: "Booking not found.."
             })
         }    
+
+        return res.status(200).json({
+            success: true,
+            data: booking
+        })
     } catch (err) {
 
     }
