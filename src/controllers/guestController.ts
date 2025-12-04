@@ -98,8 +98,10 @@ export const updateRSVP = async (req: Request, res: Response) => {
             message: "RSVP updated..",
             data: guest
         })
-        
-    } catch (err) {
 
+    } catch (err: any) {
+        return res.status(500).json({
+            message: err?.message
+        })
     }
 }
