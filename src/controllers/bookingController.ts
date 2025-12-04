@@ -72,6 +72,8 @@ export const getBookingById = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params
 
+        const booking = await Booking.findOne({ _id: id, userId: req.user._id })
+
     } catch (err) {
 
     }
