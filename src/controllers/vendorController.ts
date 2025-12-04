@@ -60,8 +60,14 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
 
 
 // get vendor by id function
-export const getVendorById = async (req: AuthRequest, res: Response) => {
-    
+export const getVendorById = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params
+
+        const vendor = await Vendor.findById(id).select("-addedBy")
+    } catch (err) {
+
+    }
 }
 
 // update vendor function (only admin)'
