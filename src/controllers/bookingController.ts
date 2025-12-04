@@ -67,6 +67,12 @@ export const getMyBooking = async (req: AuthRequest, res: Response) => {
 }
 
 
+// get booking by id function
+export const getBookingById = async (req: AuthRequest, res: Response) => {
+
+}
+
+
 // update booking status function
 export const updateBooking = async (req: AuthRequest, res: Response) => {
     try {

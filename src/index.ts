@@ -5,6 +5,8 @@ import AuthRoutes from "./routes/authRoutes";
 import cors from "cors";
 import EventRoutes from "./routes/eventRoutes";
 import VendorRoutes from "./routes/vendorRoutes";
+import BookingRoutes from "./routes/bookingRoutes";
+
 
 dotenv.config();
 
@@ -26,6 +28,7 @@ app.use(cors({
 app.use("/api/v1/auth", AuthRoutes)
 app.use("/api/events", EventRoutes)
 app.use("/api/vendors", VendorRoutes)
+app.use("/api/bookings", BookingRoutes)
 
 mongoose.connect(MONGO_URL).then(() => {
     console.log("Database connected..")
