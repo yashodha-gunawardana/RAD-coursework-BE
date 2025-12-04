@@ -66,7 +66,15 @@ export const getGuestByEvent = async (req: Request, res: Response) => {
             pending: guests.filter(g => g.rsvpStatus === "PENDING").length
         }
 
-    } catch (err) {
+        return res.json({
+            success: true,
+            stats,
+            data: guests
+        })
 
+    } catch (err: any) {
+        return res.status(500).json({
+            message: err?.message
+        })
     }
 }
