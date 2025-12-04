@@ -65,10 +65,25 @@ export const getVendorById = async (req: Request, res: Response) => {
         const { id } = req.params
 
         const vendor = await Vendor.findById(id).select("-addedBy")
-    } catch (err) {
 
+        if (!vendor) {
+            return res.status(404).json({
+                message: "Vendor not found.."
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: vendor
+        })
+
+    } catch (err: any) {
+        return res.status(500).json({
+            message: err?.message
+        })
     }
 }
+
 
 // update vendor function (only admin)'
 export const updateVendor = async (req: AuthRequest, res: Response) => {

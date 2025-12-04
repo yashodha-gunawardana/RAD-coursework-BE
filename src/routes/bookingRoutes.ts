@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createBooking, getMyBooking, updateBooking, deleteBooking } from "../controllers/bookingController";
+import { createBooking, getMyBooking, getBookingById, updateBooking, deleteBooking } from "../controllers/bookingController";
 import { authenticate } from "../middleware/authMiddleware";
 
 
@@ -13,8 +13,9 @@ router
 
 router
     .route("/:id")
+    .get(authenticate, getBookingById)
     .put(authenticate, updateBooking)
     .delete(authenticate, deleteBooking)
-    
+
 
 export default router
