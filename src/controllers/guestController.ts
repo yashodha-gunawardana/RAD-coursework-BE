@@ -56,6 +56,8 @@ export const getGuestByEvent = async (req: Request, res: Response) => {
             })
         }
 
+        const guests = await Guest.find({ eventId }).sort({ createdAt: -1 })
+
     } catch (err) {
 
     }
