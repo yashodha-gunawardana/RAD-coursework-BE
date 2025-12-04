@@ -8,6 +8,7 @@ export enum RSVPStatus {
     MAYBE = "MAYBE"
 }
 
+// TypeScript structure
 export interface IGuest extends Document {
     eventId: mongoose.Types.ObjectId
     name: string
@@ -17,3 +18,17 @@ export interface IGuest extends Document {
     rsvpStatus: RSVPStatus
     message?: string
 }
+
+// database structure
+const guestSchema = new Schema<IGuest> (
+    {
+        eventId: { type: Schema.Types.ObjectId, ref: "Event", required: true },
+        name: { type: String, required: true },
+        email: { type: String, required: true },
+        phone: { type: String },
+        plusOne: { type: Boolean, default: false },
+        rsvpStatus: { type: String, enum: Object.values(RSVPStatus), default: RSVPStatus.PENDING },
+        message: String
+    },
+    { timestamps: true }
+)
