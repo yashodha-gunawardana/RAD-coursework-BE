@@ -78,3 +78,15 @@ export const getGuestByEvent = async (req: Request, res: Response) => {
         })
     }
 }
+
+
+// update RSVP function
+export const updateRSVP = async (req: Request, res: Response) => {
+    try {
+        const { guestId } = req.params
+        const { rsvpStatus, plusOne } = req.body
+
+    } catch (err) {
+
+    }
+}
