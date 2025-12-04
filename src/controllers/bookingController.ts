@@ -75,6 +75,12 @@ export const getBookingById = async (req: AuthRequest, res: Response) => {
         const booking = await Booking.findOne({ _id: id, userId: req.user._id })
             .populate("eventId", "title date location")
             .populate("vendorId", "name category image")
+
+        if (!booking) {
+            return res.status(404).json({
+                message: "Booking not found.."
+            })
+        }    
     } catch (err) {
 
     }
