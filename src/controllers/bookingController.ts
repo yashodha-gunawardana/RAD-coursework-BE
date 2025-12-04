@@ -73,7 +73,8 @@ export const getBookingById = async (req: AuthRequest, res: Response) => {
         const { id } = req.params
 
         const booking = await Booking.findOne({ _id: id, userId: req.user._id })
-
+            .populate("eventId", "title date location")
+            .populate("vendorId", "name category image")
     } catch (err) {
 
     }
