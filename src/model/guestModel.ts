@@ -32,3 +32,5 @@ const guestSchema = new Schema<IGuest> (
     },
     { timestamps: true }
 )
+
+export default mongoose.model<IGuest>("Guest", guestSchema)
