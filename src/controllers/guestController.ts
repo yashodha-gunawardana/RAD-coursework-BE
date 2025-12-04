@@ -40,3 +40,13 @@ export const addGuest = async (req: Request, res: Response) => {
 
     }
 }
+
+
+// get guest by event function
+export const getGuestByEvent = async (req: Request, res: Response) => {
+    try {
+
+    } catch (err) {
+        
+    }
+}
