@@ -30,3 +30,15 @@ export interface IBudget extends Document {
     createdAt: Date
     updatedAt: Date
 }
+
+
+// database structure for item selection
+const selectedItemsSchema = new Schema<IUserSelectedItems> (
+    {
+        itemId: { type: Schema.Types.ObjectId, required: true },
+        name: { type: String, required: true },
+        unitPrice: { type: Number, required: true },
+        quantity: { type: Number, required: true },
+        total: { type: Number, required: true }
+    }
+)
