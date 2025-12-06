@@ -1,6 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 
-export enum Type {
+export enum EventType {
     WEDDING = "WEDDING",
     BIRTHDAY = "BIRTHDAY",
     CONFERENCE = "CONFERENCE",
@@ -9,7 +9,7 @@ export enum Type {
     OTHER = "OTHER"
 }
 
-export enum Status {
+export enum EventStatus {
     PLANNING = "PLANNING",
     ONGOING = "ONGOING",
     COMPLETED = "COMPLETED",
@@ -20,14 +20,21 @@ export enum Status {
 export interface IEvent extends Document {
     userId: mongoose.Types.ObjectId
     title: string
-    type: Type
+    type: EventType
     date: Date
     time?: string
     location: string
     description?: string
     image?: string
-    status: Status
+    basePrice: number
+    extraItems?: {
+        name: string
+        unitPrice: number
+        quantity?: number
+    }[];
+    status: EventStatus
     createdAt: Date
+    updatedAt: Date
 }
 
 // Database structure for event

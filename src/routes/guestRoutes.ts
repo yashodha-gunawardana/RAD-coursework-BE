@@ -11,3 +11,6 @@ router.post("/", authenticate, addGuest)
 router.get("/event/:eventId", authenticate, getGuestByEvent)
 
 router.put("/rsvp/:guestId", updateRSVP)
+
+
+export default router
