@@ -80,17 +80,17 @@ export const getGuestByEvent = async (req: Request, res: Response) => {
 }
 
 
-// update RSVP function
+// update RSVP function (gusest can do without login)
 export const updateRSVP = async (req: Request, res: Response) => {
     try {
-        const { id: eventId, email } = req.params
-        const { rsvpStatus, plusOne } = req.body
+        
+        const { eventId, email, rsvpStatus, plusOne } = req.body
 
         const guest = await Guest.findByIdAndUpdate({ eventId, email}, { rsvpStatus, plusOne }, { new: true })
 
         if (!guest) {
             return res.status(404).json({
-                message: "Guest not found.."
+                message: "Guest not found for this event.."
             })
         }
 

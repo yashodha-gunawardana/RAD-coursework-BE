@@ -6,11 +6,13 @@ import { authenticate } from "../middleware/authMiddleware";
 const router = Router();
 
 
-router.post("/", authenticate, addGuest)
+router.post("/", addGuest)
 
+// owner only
 router.get("/event/:id", authenticate, getGuestByEvent)
 
-router.put("/rsvp/:id", authenticate, updateRSVP)
+// no login required
+router.put("/rsvp", updateRSVP)
 
 
 export default router
