@@ -5,7 +5,7 @@ export enum RSVPStatus {
     PENDING = "PENDING",
     GOING = "GOING",
     NOT_GOING = "NOT_GOING",
-    MAYBE = "MAYBE"
+    MAYBE = "MAYBE",
 }
 
 // TypeScript structure
@@ -28,7 +28,7 @@ const guestSchema = new Schema<IGuest> (
         phone: { type: String },
         plusOne: { type: Boolean, default: false },
         rsvpStatus: { type: String, enum: Object.values(RSVPStatus), default: RSVPStatus.PENDING },
-        message: String
+        message: { type: String }
     },
     { timestamps: true }
 )

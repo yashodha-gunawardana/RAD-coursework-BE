@@ -8,9 +8,9 @@ const router = Router();
 
 router.post("/", authenticate, addGuest)
 
-router.get("/event/:eventId", authenticate, getGuestByEvent)
+router.get("/event/:id", authenticate, getGuestByEvent)
 
-router.put("/rsvp/:guestId", updateRSVP)
+router.put("/rsvp/:id", authenticate, updateRSVP)
 
 
 export default router

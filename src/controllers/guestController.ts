@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Guest from "../model/guestModel";
+import Guest, { RSVPStatus } from "../model/guestModel";
 import Event from "../model/eventModel";
 
 
@@ -24,7 +24,7 @@ export const addGuest = async (req: Request, res: Response) => {
             phone,
             plusOne,
             message,
-            rsvpStatus: "PENDING"
+            rsvpStatus: RSVPStatus.PENDING
         })
         await newGuest.save()
 
@@ -45,7 +45,7 @@ export const addGuest = async (req: Request, res: Response) => {
 // get guest by event function
 export const getGuestByEvent = async (req: Request, res: Response) => {
     try {
-        const { eventId } = req.params
+        const { id: eventId } = req.params
         const userId = (req as any).user._id
 
         const event = await Event.findOne({ _id: eventId, userId })
@@ -60,10 +60,10 @@ export const getGuestByEvent = async (req: Request, res: Response) => {
 
         const stats = {
             total: guests.length,
-            going: guests.filter(g => g.rsvpStatus === "GOING").length,
-            notGoing: guests.filter(g => g.rsvpStatus === "NOT_GOING").length,
-            maybe: guests.filter(g => g.rsvpStatus === "MAYBE").length,
-            pending: guests.filter(g => g.rsvpStatus === "PENDING").length
+            going: guests.filter(g => g.rsvpStatus === RSVPStatus.GOING).length,
+            notGoing: guests.filter(g => g.rsvpStatus === RSVPStatus.NOT_GOING).length,
+            maybe: guests.filter(g => g.rsvpStatus === RSVPStatus.MAYBE).length,
+            pending: guests.filter(g => g.rsvpStatus === RSVPStatus.PENDING).length
         }
 
         return res.json({
@@ -83,7 +83,7 @@ export const getGuestByEvent = async (req: Request, res: Response) => {
 // update RSVP function
 export const updateRSVP = async (req: Request, res: Response) => {
     try {
-        const { guestId } = req.params
+        const { id: guestId } = req.params
         const { rsvpStatus, plusOne } = req.body
 
         const guest = await Guest.findByIdAndUpdate(guestId, { rsvpStatus, plusOne }, { new: true })
