@@ -1,11 +1,18 @@
 import { Request, Response } from "express";
-import Event, { IEvent, Status } from "../model/eventModel";
+import Event, { IEvent, EventStatus } from "../model/eventModel";
 import { AuthRequest } from "../middleware/authMiddleware";
 
 
 // create new event function
 export const createEvent = async (req: AuthRequest, res: Response) => {
     try {
+
+        if (!req.user?.roles.includes("ADMIN")) {
+            return res.status(403).json({
+                message: "Only admin can add events.."
+            })
+        }
+        
         const { title, type, date, time, location, description, image } = req.body
 
         // new Event object based on req data

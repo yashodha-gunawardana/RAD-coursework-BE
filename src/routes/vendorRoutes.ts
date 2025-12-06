@@ -7,14 +7,13 @@ import { Role } from "../model/userModel";
 
 const router = Router();
 
+// public
 router.get("/", getAllVendors)
+router.get("/:id", getVendorById)
 
-router.get("/", getVendorById)
-
+// admin only
 router.post("/", authenticate, requiredRole([Role.ADMIN]), createVendor)
-
 router.put("/:id", authenticate, requiredRole([Role.ADMIN]), updateVendor)
-
 router.delete("/:id", authenticate, requiredRole([Role.ADMIN]), deleteVendor)
 
 
