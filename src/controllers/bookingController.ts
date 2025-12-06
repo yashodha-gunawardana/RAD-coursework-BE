@@ -6,7 +6,7 @@ import { count } from "console";
 import { data } from "react-router-dom";
 
 
-// new booking create function
+// new booking create function (event owner / admin only)
 export const createBooking = async (req: AuthRequest, res: Response) => {
     try {
         const { eventId, vendorId, notes } = req.body
@@ -46,7 +46,7 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
 }
 
 
-// get own booking function 
+// get all booking of user function (event owner / admin only)
 export const getMyBooking = async (req: AuthRequest, res: Response) => {
     try {
         const bookings = await Booking.find({ userId: req.user._id })
@@ -67,7 +67,7 @@ export const getMyBooking = async (req: AuthRequest, res: Response) => {
 }
 
 
-// get booking by id function
+// get booking by id function (event owner / admin only)
 export const getBookingById = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params
@@ -94,13 +94,13 @@ export const getBookingById = async (req: AuthRequest, res: Response) => {
 }
 
 
-// update booking status function
+// update booking status function (event owner / admin only)
 export const updateBooking = async (req: AuthRequest, res: Response) => {
     try {
-        const { status } = req.body // new status
+        const { status, notes } = req.body // new status
         const { id } = req.params // booking id
 
-        const updated = await Booking.findByIdAndUpdate({ id: id, userId: req.user._id}, { status }, { new: true })
+        const updated = await Booking.findByIdAndUpdate({ id: id, userId: req.user._id}, { status, notes }, { new: true })
 
         if (!updated) {
             return res.status(404).json({
@@ -121,7 +121,7 @@ export const updateBooking = async (req: AuthRequest, res: Response) => {
 }
 
 
-// delete booking function
+// delete booking function (event owner / admin only)
 export const deleteBooking = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params
