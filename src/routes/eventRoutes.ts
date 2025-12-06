@@ -14,7 +14,7 @@ router
 router
     .route("/:id")
     .get(authenticate, getEventById)
-    .put(authenticate, updateEvent)
-    .delete(authenticate, deleteEvent)
+    .put(authenticate, requiredRole([Role.ADMIN]), updateEvent)
+    .delete(authenticate, requiredRole([Role.ADMIN]), deleteEvent)
 
 export default router
