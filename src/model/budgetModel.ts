@@ -58,5 +58,10 @@ const budgetSchema = new Schema<IBudget> (
     { timestamps: true }
 )
 
-
+// one budget, per event per user
 budgetSchema.index({ userId: 1, eventId: 1 }, { unique: true })
+
+
+budgetSchema.pre("save", function (next) {
+    
+})
