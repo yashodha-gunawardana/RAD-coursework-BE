@@ -39,7 +39,7 @@ const selectedItemsSchema = new Schema<IUserSelectedItems> (
         name: { type: String, required: true },
         unitPrice: { type: Number, required: true },
         quantity: { type: Number, required: true },
-        total: { type: Number, required: true }
+        total: { type: Number, required: true } // auto calculate
     }
 )
 
@@ -57,3 +57,6 @@ const budgetSchema = new Schema<IBudget> (
     },
     { timestamps: true }
 )
+
+
+budgetSchema.index({ userId: 1, eventId: 1 }, { unique: true })
