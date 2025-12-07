@@ -50,6 +50,10 @@ const budgetSchema = new Schema<IBudget> (
         eventId: { type: Schema.Types.ObjectId, ref: "Event", required: true },
         userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
         basePrice: { type: Number, required: true },
-        selectedItems: { type: [selectedItemsSchema], default: [] }
-    }
+        selectedItems: { type: [selectedItemsSchema], default: [] },
+        extraTotal: { type: Number, default: 0 },
+        totalAmount: { type: Number, default: 0},
+        status: { type: String, enum: Object.values(BudgetStatus), default: BudgetStatus.DRAFT }
+    },
+    { timestamps: true }
 )
