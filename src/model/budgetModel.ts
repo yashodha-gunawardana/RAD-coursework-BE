@@ -72,5 +72,8 @@ budgetSchema.pre("save", function (next) {
 
     this.extraTotal = extraTotal
 
+    // final total amount
     this.totalAmount = this.basePrice + extraTotal
+
+    next()
 })
