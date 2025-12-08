@@ -63,5 +63,10 @@ budgetSchema.index({ userId: 1, eventId: 1 }, { unique: true })
 
 
 budgetSchema.pre("save", function (next) {
-    let extraTotal = 0
+    let extraTotal = 0 // extra total calculation
+
+    this.selectedItems.forEach((item) => {
+        item.total = item.unitPrice * item.quantity
+        extraTotal =+ item.total
+    })
 })
