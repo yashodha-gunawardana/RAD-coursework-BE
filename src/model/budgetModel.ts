@@ -77,3 +77,5 @@ budgetSchema.pre("save", function (next) {
 
     next()
 })
+
+export default mongoose.model<IBudget>("Budget", budgetSchema)
