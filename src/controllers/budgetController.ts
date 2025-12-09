@@ -54,7 +54,7 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
         let budget = await Budget.findOne({ userId, eventId })
 
         // store whether this is an update or create operation
-        const isUpdate = !!budget
+        const isUpdate = budget ? true : false
 
         if (budget) {
             budget.selectedItems = validItems
@@ -71,7 +71,21 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
             })
         }
 
-        
+        return res.status(isUpdate ? 200 : 201).json({
+            message: isUpdate ? "Budget updated successfully.." : "Budget created successfully..",
+            data: {
+                budgetId: budget._id,
+                eventId: budget.eventId,
+                userId: budget.userId,
+                basePrice: budget.basePrice,
+                selectedItems: budget.selectedItems,
+                extraTotal: budget.extraTotal,
+                totalAmount: budget.totalAmount,
+                status: budget.status,
+                createdAt: budget.createdAt,
+                updatedAt: budget.updatedAt
+            }
+        })
 
     } catch (err) {
 
