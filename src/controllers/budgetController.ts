@@ -21,6 +21,12 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
         const validItems: any[] = []
         let calculatedExtraTotal = 0
 
+        for (const item of selectedItems) {
+            const eventExtraItem = event.extraItems?.find(
+                (e: any) => e.name === item.name
+            )
+        }
+
     } catch (err) {
 
     }
