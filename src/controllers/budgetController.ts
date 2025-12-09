@@ -53,6 +53,9 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
         // check budget already exists
         let budget = await Budget.findOne({ userId, eventId })
 
+        // store whether this is an update or create operation
+        const isUpdate = !!budget
+
         if (budget) {
             budget.selectedItems = validItems
             budget.basePrice = basePrice
@@ -67,6 +70,8 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
                 selectedItems: validItems
             })
         }
+
+        
 
     } catch (err) {
 
