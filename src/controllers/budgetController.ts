@@ -31,8 +31,12 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
                     message: `Extra item "${item.name}" not available for this event..`
                 })
             }
+
+            const quantity = item.quantity || 1
+
         }
 
+        
         
 
     } catch (err) {
