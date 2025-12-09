@@ -10,7 +10,6 @@ export enum BudgetStatus {
 
 // interface for user-selected extra items
 export interface IUserSelectedItems {
-    itemId: mongoose.Types.ObjectId
     name: string
     unitPrice: number
     quantity: number
@@ -35,12 +34,12 @@ export interface IBudget extends Document {
 // database structure for item selection
 const selectedItemsSchema = new Schema<IUserSelectedItems> (
     {
-        itemId: { type: Schema.Types.ObjectId, required: true },
         name: { type: String, required: true },
         unitPrice: { type: Number, required: true, min: 0 },
         quantity: { type: Number, required: true, min: 1 },
-        total: { type: Number, required: true } // auto calculate
-    }
+        total: { type: Number, required: true, min: 0 } // auto calculate
+    },
+    { _id: false }
 )
 
 

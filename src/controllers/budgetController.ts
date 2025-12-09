@@ -42,6 +42,7 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
                 total,
 
             })
+            calculatedExtraTotal += total
 
         }
 
