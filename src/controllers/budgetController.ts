@@ -87,7 +87,9 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
             }
         })
 
-    } catch (err) {
-
+    } catch (err: any) {
+        return res.status(500).json({
+            message: err?.message
+        })
     }
 }
