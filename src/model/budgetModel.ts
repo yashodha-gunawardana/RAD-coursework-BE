@@ -37,8 +37,8 @@ const selectedItemsSchema = new Schema<IUserSelectedItems> (
     {
         itemId: { type: Schema.Types.ObjectId, required: true },
         name: { type: String, required: true },
-        unitPrice: { type: Number, required: true },
-        quantity: { type: Number, required: true },
+        unitPrice: { type: Number, required: true, min: 0 },
+        quantity: { type: Number, required: true, min: 1 },
         total: { type: Number, required: true } // auto calculate
     }
 )
@@ -49,10 +49,10 @@ const budgetSchema = new Schema<IBudget> (
     {
         eventId: { type: Schema.Types.ObjectId, ref: "Event", required: true },
         userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-        basePrice: { type: Number, required: true },
+        basePrice: { type: Number, required: true, min: 0 },
         selectedItems: { type: [selectedItemsSchema], default: [] },
-        extraTotal: { type: Number, default: 0 },
-        totalAmount: { type: Number, default: 0},
+        extraTotal: { type: Number, default: 0, min: 0 },
+        totalAmount: { type: Number, default: 0, min: 0 },
         status: { type: String, enum: Object.values(BudgetStatus), default: BudgetStatus.DRAFT }
     },
     { timestamps: true }
@@ -67,7 +67,7 @@ budgetSchema.pre("save", function (next) {
 
     this.selectedItems.forEach((item) => {
         item.total = item.unitPrice * item.quantity
-        extraTotal =+ item.total
+        extraTotal += item.total
     })
 
     this.extraTotal = extraTotal
