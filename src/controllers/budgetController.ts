@@ -51,7 +51,7 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
         const totalAmount = basePrice + calculatedExtraTotal
 
         
-        
+        let budget = await Budget.findOne({ userId, eventId })
 
     } catch (err) {
 
