@@ -250,7 +250,7 @@ export const updateBudgetStatus = async (req: AuthRequest, res: Response) => {
 
         if (!isValid(budgetId)) {
             return res.status(400).json({
-                message: "Invalid event ID.."
+                message: "Invalid budget ID.."
             })
         }  
 
@@ -282,5 +282,34 @@ export const updateBudgetStatus = async (req: AuthRequest, res: Response) => {
         return res.status(500).json({
             message: err?.message
         })
+    }
+}
+
+
+// delete budget function
+export const deleteBudget = async (req: AuthRequest, res: Response) => {
+    try {
+
+        if (!hasAceess(req.user, ["USER", "ADMIN"])) {
+            return res.status(403).json({
+                message: "Access denied. Only USER or ADMIN can create or update budgets.."
+            });
+        }
+
+        const { budgetId } = req.params
+        const userId = req.user._id
+
+        if (!isValid(budgetId)) {
+            return res.status(400).json({
+                message: "Invalid budget ID.."
+            })
+        }  
+
+        const budget = await Budget.findOneAndDelete({ _id: budgetId, userId })
+        
+
+
+    } catch (err) {
+
     }
 }
