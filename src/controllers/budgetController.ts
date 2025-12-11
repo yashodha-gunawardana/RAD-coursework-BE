@@ -5,6 +5,11 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import mongoose from "mongoose";
 
 
+
+// role check
+const hasAceess = (user: any, roles: string[]) => user?.roles?.some((r: string) => roles.includes(r))
+
+
 // create or update budget function (user)
 export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
     try {
