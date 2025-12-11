@@ -268,7 +268,12 @@ export const updateBudgetStatus = async (req: AuthRequest, res: Response) => {
             })
         }
 
+        // update budget status
         budget.status = status
+
+        await budget.save()
+
+        
     } catch (err) {
 
     }
