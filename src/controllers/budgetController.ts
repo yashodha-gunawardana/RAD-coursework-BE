@@ -14,7 +14,7 @@ const hasAceess = (user: any, roles: string[]) => user?.roles?.some((r: string) 
 const isValid = (id: string) => mongoose.Types.ObjectId.isValid(id)
 
 
-// create or update budget function (user)
+// create or update budget function 
 export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
     try {
 
@@ -27,7 +27,7 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
         const { eventId, selectedItems = [] } = req.body
         const userId = req.user._id
 
-        
+
         if (!isValid(eventId)) {
             return res.status(400).json({
                 message: "Invalid event ID.."
@@ -117,4 +117,11 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
 }
 
 
-// get
+// get budget by id function 
+export const getBudgetId = async (req: AuthRequest, res: Response) => {
+    try {
+
+    } catch (err) {
+        
+    }
+}
