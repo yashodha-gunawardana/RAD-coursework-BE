@@ -147,7 +147,12 @@ export const getBudgetId = async (req: AuthRequest, res: Response) => {
                 message: "Budget not found.."
             })
         }
-        
+
+        return res.status(200).json({
+            message: "Budget retrieved successfully..",
+            data: budget
+        })
+
     } catch (err) {
 
     }
