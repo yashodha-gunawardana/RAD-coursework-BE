@@ -2,7 +2,7 @@ import { Router } from "express";
 import { createBooking, getMyBooking, getBookingById, updateBooking, deleteBooking } from "../controllers/bookingController";
 import { authenticate } from "../middleware/authMiddleware";
 import { requiredRole } from "../middleware/roleMiddleware";
-import { Role } from "../model/userModel";
+import { Role } from "../models/userModel";
 
 
 const router = Router();

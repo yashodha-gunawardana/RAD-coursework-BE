@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import Event from "../model/eventModel";
-import Booking from "../model/bookingModel";
+import Event from "../models/eventModel";
+import Booking from "../models/bookingModel";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { count } from "console";
 import { data } from "react-router-dom";

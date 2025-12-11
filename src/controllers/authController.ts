@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import User, { Role, Status, IUser } from "../model/userModel";
+import User, { Role, Status, IUser } from "../models/userModel";
 import bcrypt from "bcryptjs";
 import { signAccessToken } from "../utils/tokens";
 import { AuthRequest } from "../middleware/authMiddleware";

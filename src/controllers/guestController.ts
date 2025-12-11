@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import Guest, { RSVPStatus } from "../model/guestModel";
-import Event from "../model/eventModel";
+import Guest, { RSVPStatus } from "../models/guestModel";
+import Event from "../models/eventModel";
 
 
 // add new guest function (owner only)

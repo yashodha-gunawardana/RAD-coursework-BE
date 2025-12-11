@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Vendor from "../model/vendorModel";
+import Vendor from "../models/vendorModel";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { count } from "console";
 

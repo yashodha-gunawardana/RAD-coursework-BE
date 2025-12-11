@@ -2,7 +2,7 @@ import { Router } from "express";
 import { addGuest, getGuestByEvent, updateRSVP } from "../controllers/guestController";
 import { authenticate } from "../middleware/authMiddleware";
 import { requiredRole } from "../middleware/roleMiddleware";
-import { Role } from "../model/userModel"
+import { Role } from "../models/userModel"
 
 
 const router = Router();

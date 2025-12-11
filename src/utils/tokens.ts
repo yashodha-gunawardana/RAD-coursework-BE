@@ -1,4 +1,4 @@
-import { IUser } from "../model/userModel";
+import { IUser } from "../models/userModel";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 

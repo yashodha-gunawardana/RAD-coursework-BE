@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import Event, { IEvent, EventStatus } from "../model/eventModel";
+import Event, { IEvent, EventStatus } from "../models/eventModel";
 import { AuthRequest } from "../middleware/authMiddleware";
 
 

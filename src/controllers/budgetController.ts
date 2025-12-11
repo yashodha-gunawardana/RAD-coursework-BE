@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import Budget, { IBudget, BudgetStatus } from "../model/budgetModel";
-import Event from "../model/eventModel";
+import Budget, { IBudget, BudgetStatus } from "../models/budgetModel";
+import Event from "../models/eventModel";
 import { AuthRequest } from "../middleware/authMiddleware";
 import mongoose from "mongoose";
 
@@ -133,7 +133,7 @@ export const getBudgetId = async (req: AuthRequest, res: Response) => {
 
         if (!isValid(budgetId)) {
             return res.status(400).json({
-                message: "Invalid event ID.."
+                message: "Invalid budget ID.."
             })
         }
 
@@ -304,6 +304,8 @@ export const deleteBudget = async (req: AuthRequest, res: Response) => {
                 message: "Invalid budget ID.."
             })
         }  
+
+        const query: any = { _id: budgetId }
 
         const budget = await Budget.findOneAndDelete({ _id: budgetId, userId })
 

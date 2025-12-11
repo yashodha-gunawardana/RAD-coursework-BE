@@ -2,7 +2,7 @@ import { Router } from "express";
 import { registerUser, loginUser, getMyDetails } from "../controllers/authController";
 import { authenticate } from "../middleware/authMiddleware";
 import { requiredRole } from "../middleware/roleMiddleware";
-import { Role } from "../model/userModel";
+import { Role } from "../models/userModel";
 
 // create a new Express Router object
 const router = Router();
