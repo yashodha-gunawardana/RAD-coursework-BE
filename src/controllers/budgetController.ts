@@ -225,8 +225,10 @@ export const getAllUserBudgets = async (req: AuthRequest, res: Response) => {
             count: budgets.length,
             data: budgets
         })
-        
-    } catch (err) {
 
+    } catch (err: any) {
+        return res.status(500).json({
+            message: err?.message
+        })
     }
 }
