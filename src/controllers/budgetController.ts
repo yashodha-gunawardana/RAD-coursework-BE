@@ -307,6 +307,10 @@ export const deleteBudget = async (req: AuthRequest, res: Response) => {
 
         const query: any = { _id: budgetId }
 
+        if (req.user.roles.includes("USER")) {
+            query.userId = userId
+        }
+
         const budget = await Budget.findOneAndDelete({ _id: budgetId, userId })
 
         if (!budget) {
