@@ -121,7 +121,13 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
 export const getBudgetId = async (req: AuthRequest, res: Response) => {
     try {
 
+        if (!hasAceess(req.user, ["USER", "ADMIN"])) {
+            return res.status(403).json({
+                message: "Access denied. Only USER or ADMIN can create or update budgets."
+            });
+        }
+
     } catch (err) {
-        
+
     }
 }
