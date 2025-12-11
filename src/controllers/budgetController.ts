@@ -81,6 +81,9 @@ export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
         if (budget) {
             budget.selectedItems = validItems
             budget.basePrice = basePrice
+            budget.extraTotal = calculatedExtraTotal
+            budget.totalAmount = basePrice + calculatedExtraTotal
+            
             await budget.save()
         
         } else {
@@ -307,11 +310,11 @@ export const deleteBudget = async (req: AuthRequest, res: Response) => {
 
         const query: any = { _id: budgetId }
 
-        if (req.user.roles.includes("USER")) {
+        if (!req.user.roles.includes("ADMIN")) {
             query.userId = userId
         }
 
-        const budget = await Budget.findOneAndDelete({ _id: budgetId, userId })
+        const budget = await Budget.findOneAndDelete(query)
 
         if (!budget) {
             return res.status(404).json({
