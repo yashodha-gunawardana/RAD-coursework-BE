@@ -306,10 +306,20 @@ export const deleteBudget = async (req: AuthRequest, res: Response) => {
         }  
 
         const budget = await Budget.findOneAndDelete({ _id: budgetId, userId })
-        
 
+        if (!budget) {
+            return res.status(404).json({
+                message: "Budget not found.."
+            })
+        }
 
-    } catch (err) {
+        return res.status(200).json({
+            message: "Budget deleted successfully.."
+        })
 
+    } catch (err: any) {
+        return res.status(500).json({
+            message: err?.message
+        })
     }
 }
