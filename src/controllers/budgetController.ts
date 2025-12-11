@@ -153,7 +153,9 @@ export const getBudgetId = async (req: AuthRequest, res: Response) => {
             data: budget
         })
 
-    } catch (err) {
-
+    } catch (err: any) {
+        return res.status(500).json({
+            message: err?.message
+        })
     }
 }
