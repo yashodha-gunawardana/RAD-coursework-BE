@@ -8,6 +8,7 @@ import VendorRoutes from "./routes/vendorRoutes";
 import BookingRoutes from "./routes/bookingRoutes";
 import GuestRoutes from "./routes/guestRoutes";
 import BudgetRoutes from "./routes/budgetRoutes";
+import path from "path";
 
 
 dotenv.config();
@@ -19,6 +20,10 @@ const app = express();
 
 // json data parse in incoming requests
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+
 
 app.use(cors({
     origin: ["http://localhost:5173"],
@@ -28,11 +33,11 @@ app.use(cors({
 
 // mount routes
 app.use("/api/v1/auth", AuthRoutes)
-app.use("/api/events", EventRoutes)
-app.use("/api/vendors", VendorRoutes)
-app.use("/api/bookings", BookingRoutes)
-app.use("/api/guests", GuestRoutes)
-app.use("/api/budget", BudgetRoutes)
+app.use("/api/v1/events", EventRoutes)
+app.use("/api/v1/vendors", VendorRoutes)
+app.use("/api/v1/bookings", BookingRoutes)
+app.use("/api/v1/guests", GuestRoutes)
+app.use("/api/v1/budget", BudgetRoutes)
 
 
 mongoose.connect(MONGO_URL).then(() => {

@@ -23,7 +23,7 @@ export const registerUser = async (req: Request, res: Response) => {
         // only user and vendor roles allowed at registration
         if (role !== Role.USER && role !== Role.VENDOR) {
             return res.status(400).json({
-                message: "Invalid role.."
+                message: "Invalid role. Only USER or VENDOR allowed during registration."
             })
         }
 
@@ -76,17 +76,23 @@ export const loginUser = async (req: Request, res: Response) => {
     try {
         const { email, password } = req.body
 
-        // find the user in the database using the provided email
-        const existingUser = await User.findOne({ email })
+        if (!email || !password) {
+            return res.status(400).json({
+                message: "Email and password are required.."
+            });
+        }
 
-        if (!existingUser) {
+        // find the user in the database using the provided email
+        const user = await User.findOne({ email })
+
+        if (!user) {
             return res.status(401).json({
                 message: "Invalid credentials.."
             })
         }
 
         // compare the entered passsword with the stored hashed password
-        const valid = await bcrypt.compare(password, existingUser.password)
+        const valid = await bcrypt.compare(password, user.password)
 
         if (!valid) {
             return res.status(401).json({
@@ -95,18 +101,22 @@ export const loginUser = async (req: Request, res: Response) => {
         }
 
         // generate JWT access token for the authenticated user
-        const accessToken = signAccessToken(existingUser)
+        const accessToken = signAccessToken(user)
 
         res.status(200).json({
             message: "Login successfully..",
             data: {
-                email: existingUser.email,
-                roles: existingUser.roles,
+                id: user._id,
+                fullname: user.fullname,
+                email: user.email,
+                roles: user.roles,
+                approved: user.approved,
                 accessToken
             }
         })
 
     } catch (err: any) {
+        console.error("Login error:", err);
         res.status(500).json({
             message: err?.message
         })
@@ -116,31 +126,39 @@ export const loginUser = async (req: Request, res: Response) => {
 
 // get own details function
 export const getMyDetails = async (req: AuthRequest, res: Response) => {
-    if (!req.user) {
-        return res.status(401).json({
-            message: "Unauthorized.."
-        })
+    try {
+        if (!req.user?._id) {
+            return res.status(401).json({
+                message: "Unauthorized.."
+            });
+        }
+
+        // req.user._id is now properly set by authMiddleware
+        const user = await User.findById(req.user._id).select("-password");
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found.."
+            });
+        }
+
+        res.status(200).json({
+            message: "OK..",
+            data: {
+                id: user._id,
+                fullname: user.fullname,
+                email: user.email,
+                roles: user.roles,
+                approved: user.approved
+            }
+        });
+
+    } catch (err: any) {
+        console.error("Get my details error:", err);
+        res.status(500).json({
+            message: err?.message || "Server error"
+        });
     }
-
-    // get user id from JWT payload
-    const userId = req.user.sub
-
-    // find user in database using ID and exclude password field
-    const user = ((await User.findById(userId).select("-password")) as IUser) || null
-
-    if (!user) {
-        return res.status(404).json({
-            message: "User not found.."
-        })
-    }
-
-    // extract only safe fields to send frontend
-    const { fullname, email, roles, approved } = user
-
-    res.status(200).json({
-        message: "OK..",
-        data: { fullname, email, roles, approved }
-    })
 }
 
 
@@ -148,17 +166,17 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
 export const handleRefreshToken = async (req: AuthRequest, res: Response) => {
     try {
         // get the refresh token sent by the client
-        const { token } = req.body
+        const { token: refreshToken } = req.body
 
-        if (!token) {
+        if (!refreshToken) {
             return res.status(400).json({
-                message: "Token required.."
+                message: "Refresh token required.."
             })
         }
 
         // Verify the token using JWT_REFRESH_SECRET
         // jwt.verify will decode the token and check its validity
-        const payload = jwt.verify(token, JWT_REFRESH_SECRET)
+        const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET)
 
          // Find user in database by ID from token payload
         const user = await User.findById(payload.sub)

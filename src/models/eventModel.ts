@@ -28,10 +28,11 @@ export interface IEvent extends Document {
     image?: string
     basePrice: number
     extraItems?: {
-        name: string
-        unitPrice: number
-        quantity?: number
+         name: string
+         unitPrice: number
+         quantity?: number
     }[];
+
     status: EventStatus
     createdAt: Date
     updatedAt: Date
@@ -50,12 +51,14 @@ const eventSchema = new Schema<IEvent> (
         image: { type: String },
         basePrice: { type: Number, required: true },
         extraItems: [
-            {
-                name : { type: String, required: true },
-                unitPrice: { type: Number, required: true },
-                quantity: { type: Number, default: 1 }
-            }
+          {
+            name : { type: String, required: true },
+            unitPrice: { type: Number, required: true },
+            quantity: { type: Number, default: 1 }
+          }
         ],
+          
+
         status: { type: String, enum: Object.values(EventStatus), default: EventStatus.PLANNING }
     },
     { timestamps: true }
