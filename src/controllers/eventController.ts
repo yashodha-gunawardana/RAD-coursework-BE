@@ -89,6 +89,11 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
 export const getMyEvents = async (req: AuthRequest, res: Response) => {
     try {
 
+        const page = Math.max(Number(req.query.page) || 1, 1);
+        const limit = 6;
+        const skip = (page - 1) * limit;
+
+
         // fetch all event records from db
         const events = await Event.find({ userId: req.user?._id }).sort({ date: -1 })
         
