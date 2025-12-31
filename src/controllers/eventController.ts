@@ -104,12 +104,14 @@ export const getMyEvents = async (req: AuthRequest, res: Response) => {
             Event.countDocuments({ userId }),
         ])
 
-        // fetch all event records from db
-        const events = await Event.find({ userId: req.user?._id }).sort({ date: -1 })
-        
-        return res.status(200).json({
+        res.status(200).json({
+            success: true,
+            page,
+            limit,
+            totalItems: total,
+            totalPages: Math.ceil(total / limit),
             count: events.length,
-            data: events
+            data: events,
         })
 
     } catch (err: any) {
