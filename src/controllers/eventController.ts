@@ -93,6 +93,16 @@ export const getMyEvents = async (req: AuthRequest, res: Response) => {
         const limit = 6;
         const skip = (page - 1) * limit;
 
+        const userId = req.user?._id;
+
+        const [events, total] = await Promise.all([
+            Event.find({ userId })
+                .sort({ date: -1 })
+                .skip(skip)
+                .limit(limit),
+
+            Event.countDocuments({ userId }),
+        ])
 
         // fetch all event records from db
         const events = await Event.find({ userId: req.user?._id }).sort({ date: -1 })
