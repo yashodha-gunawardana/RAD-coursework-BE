@@ -89,9 +89,10 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
 export const getMyEvents = async (req: AuthRequest, res: Response) => {
     try {
 
-        const page = Math.max(Number(req.query.page) || 1, 1);
-        const limit = 6;
-        const skip = (page - 1) * limit;
+        const page = Math.max(parseInt(req.query.page as string) || 1, 1)
+        const limit = 6
+        const skip = (page - 1) * limit
+
 
         const userId = req.user?._id;
 
