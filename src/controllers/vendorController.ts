@@ -133,6 +133,20 @@ export const updateOwnVendorProfile = async (req: AuthRequest, res: Response) =>
 
         const vendor = await Vendor.findOne({ addedBy: req.user?._id })
 
+        if (!vendor) {
+            return res.status(404).json({
+                message: "Vendor profile not found.."
+            })
+        }
+
+        const { name, category, contact, priceRange, description } = req.body
+            if (name) vendor.name = name
+            if (category) vendor.category = category
+            if (contact) vendor.contact = contact
+            if (priceRange) vendor.priceRange = priceRange
+            if (description) vendor.description = description
+            if (req.file) vendor.image = req.file.buffer.toString("base64")
+
     } catch (err) {
 
     }
