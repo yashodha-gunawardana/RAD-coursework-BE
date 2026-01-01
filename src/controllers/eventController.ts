@@ -180,6 +180,7 @@ export const getEventById = async (req: AuthRequest, res: Response) => {
 // update event function (admin only)
 export const updateEvent = async (req: AuthRequest, res: Response) => {
     try {
+        
         if (!req.user?.roles.includes(Role.ADMIN)) {
             return res.status(403).json({ message: "Only admin can update events" });
         }

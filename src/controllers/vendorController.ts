@@ -36,6 +36,7 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
         })
 
     } catch (err: any) {
+        console.error("Create vendor: ", err)
         return res.status(500).json({
             message: err?.message
         })
@@ -97,6 +98,7 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
             })
         }
 
+        // find vendor by id
         const vendor = await Vendor.findByIdAndUpdate(req.params.id, req.body, { new: true })
 
         if (!vendor) {
@@ -104,6 +106,8 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
                 message: "Vendor not found.."
             })
         }
+
+        Object.assign(vendor, req.body)
 
         return res.status(201).json({
             message: "Vendor updated successfully..",
