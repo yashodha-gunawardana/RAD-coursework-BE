@@ -133,6 +133,9 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
         }
 
 
+        if  (req.file) {
+            vendor.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`
+        }
         await vendor.save()
 
         return res.status(201).json({
