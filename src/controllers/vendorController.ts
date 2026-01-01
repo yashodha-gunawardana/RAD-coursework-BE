@@ -107,6 +107,7 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
             })
         }
 
+        // update fields from request body
         Object.assign(vendor, req.body)
         if (req.file) vendor.image = req.file.buffer.toString("base64")
 
@@ -118,9 +119,22 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
         })
 
     } catch (err: any) {
+        console.error("Update vendor error:", err)
         return res.status(500).json({
             message: err?.message
         })
+    }
+}
+
+
+// vendor update own profile
+export const updateOwnVendorProfile = async (req: AuthRequest, res: Response) => {
+    try {
+
+        const vendor = await Vendor.findOne({ addedBy: req.user?._id })
+
+    } catch (err) {
+
     }
 }
 
