@@ -108,6 +108,7 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
         }
 
         Object.assign(vendor, req.body)
+        if (req.file) vendor.image = req.file.buffer.toString("base64")
 
         return res.status(201).json({
             message: "Vendor updated successfully..",
