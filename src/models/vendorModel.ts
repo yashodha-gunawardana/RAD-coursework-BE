@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export enum VendorCategory {
-    PHOTOGRAPY = "PHOTOGRAPY",
+    PHOTOGRAPHY = "PHOTOGRAPHY",
     CATERING = "CATERING",
     DECORATION = "DECORATION",
     DJ = "DJ",

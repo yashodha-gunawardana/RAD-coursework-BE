@@ -1,9 +1,7 @@
 import { Request, Response } from "express";
 import Event, { IEvent, EventStatus } from "../models/eventModel";
 import { AuthRequest } from "../middleware/authMiddleware";
-import { uploadEventImage } from "../middleware/upload";
 import { Role } from "../models/userModel";
-
 
 
 function parseExtraItems(body: any): any[] {
@@ -180,7 +178,7 @@ export const getEventById = async (req: AuthRequest, res: Response) => {
 // update event function (admin only)
 export const updateEvent = async (req: AuthRequest, res: Response) => {
     try {
-        
+
         if (!req.user?.roles.includes(Role.ADMIN)) {
             return res.status(403).json({ message: "Only admin can update events" });
         }

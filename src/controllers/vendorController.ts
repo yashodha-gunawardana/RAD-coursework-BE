@@ -16,16 +16,28 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
             })
         }
 
-        const { name, category, contact, priceRange, description } = req.body
+        const { name, category, contact, priceRange, description, isAvailable } = req.body
 
-        const image = req.file ? req.file.buffer.toString("base64") : undefined
+        if (!name || !category || !contact || !priceRange) {
+            return res.status(400).json({
+                message: "Required fields: name, category, contact, priceRange"
+            })
+        }
+
+
+        let image: string | undefined
+        if (req.file) {
+            image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`
+        }
 
         const newVendor = new Vendor({
             name,
             category,
             contact,
             priceRange,
-            description,
+            description:description || undefined,
+            image,
+            isAvailable: isAvailable === "true" || isAvailable === true, 
             addedBy: req.user._id // track which admin added the vendor
         })
         await newVendor.save()
@@ -57,6 +69,7 @@ export const getAllVendors = async (req: Request, res: Response) => {
         })    
 
     } catch (err: any) {
+        console.error("Get all vendors error:", err)
         return res.status(500).json({
             message: err?.message
         })
@@ -81,6 +94,7 @@ export const getVendorById = async (req: Request, res: Response) => {
         })
 
     } catch (err: any) {
+        console.error("Get vendor by ID error:", err)
         return res.status(500).json({
             message: err?.message
         })
@@ -99,7 +113,7 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
         }
 
         // find vendor by id
-        const vendor = await Vendor.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        const vendor = await Vendor.findById(req.params.id)
 
         if (!vendor) {
             return res.status(404).json({
@@ -107,9 +121,17 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
             })
         }
 
-        // update fields from request body
-        Object.assign(vendor, req.body)
-        if (req.file) vendor.image = req.file.buffer.toString("base64")
+        const { name, category, contact, priceRange, description, isAvailable } = req.body
+
+        if (name !== undefined) vendor.name = name
+        if (category !== undefined) vendor.category = category
+        if (contact !== undefined) vendor.contact = contact
+        if (priceRange !== undefined) vendor.priceRange = priceRange
+        if (description !== undefined) vendor.description = description
+        if (isAvailable !== undefined) {
+            vendor.isAvailable = isAvailable === "true" || isAvailable === true
+        }
+
 
         await vendor.save()
 
@@ -149,8 +171,16 @@ export const updateOwnVendorProfile = async (req: AuthRequest, res: Response) =>
 
         await vendor.save()
 
-    } catch (err) {
+        return res.status(200).json({
+            message: "Vendor profile updated successfully..",
+            data: vendor
+        })
 
+    } catch (err: any) {
+        console.error("Update own vendor error:", err)
+        return res.status(500).json({ 
+            message: err?.message 
+        })
     }
 }
 
@@ -180,6 +210,7 @@ export const deleteVendor = async (req: AuthRequest, res: Response) => {
         })
 
     } catch (err: any) {
+        console.error("Delete vendor error:", err)
         return res.status(500).json({
             message: err?.message
         })

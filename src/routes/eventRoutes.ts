@@ -3,14 +3,14 @@ import { createEvent, getMyEvents, getEventById, updateEvent, deleteEvent } from
 import { authenticate } from "../middleware/authMiddleware";
 import { requiredRole } from "../middleware/roleMiddleware";
 import { Role } from "../models/userModel";
-import { handleMulterError, uploadEventImage } from "../middleware/upload";
+import { handleMulterError, uploadImage } from "../middleware/upload";
 
 const router = Router();
 
 
-router.post("/", authenticate, requiredRole([Role.ADMIN]), uploadEventImage, handleMulterError, createEvent)
+router.post("/", authenticate, requiredRole([Role.ADMIN]), uploadImage, handleMulterError, createEvent)
  
-    router.post("/test-upload", uploadEventImage, (req, res) => {
+    router.post("/test-upload", uploadImage, (req, res) => {
         console.log("Test upload - body:", req.body);
         console.log("Test upload - file:", req.file);
         res.json({ body: req.body, file: req.file?.originalname });
@@ -21,7 +21,7 @@ router.get("/my",authenticate, getMyEvents)
 router
     .route("/:id")
     .get(authenticate, getEventById)
-    .put(authenticate, requiredRole([Role.ADMIN]), uploadEventImage, updateEvent)
+    .put(authenticate, requiredRole([Role.ADMIN]), uploadImage, updateEvent)
     .delete(authenticate, requiredRole([Role.ADMIN]), deleteEvent)
 
 export default router
