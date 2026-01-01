@@ -147,6 +147,8 @@ export const updateOwnVendorProfile = async (req: AuthRequest, res: Response) =>
             if (description) vendor.description = description
             if (req.file) vendor.image = req.file.buffer.toString("base64")
 
+        await vendor.save()
+
     } catch (err) {
 
     }
