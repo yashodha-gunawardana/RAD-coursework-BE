@@ -16,7 +16,7 @@ router.post("/", authenticate, requiredRole([Role.ADMIN]), uploadEventImage, han
         res.json({ body: req.body, file: req.file?.originalname });
     });
 
-router.get("/",authenticate, getMyEvents)
+router.get("/my",authenticate, getMyEvents)
 
 router
     .route("/:id")

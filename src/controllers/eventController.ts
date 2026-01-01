@@ -7,21 +7,14 @@ import { Role } from "../models/userModel";
 
 
 function parseExtraItems(body: any): any[] {
-    const items: any[] = []
-    let index = 0;
+   
+    if (!body.extraItems || !Array.isArray(body.extraItems)) return []
 
-    while (body[`extraItems[${index}][name]`] !== undefined) {
-        const name = body[`extraItems[${index}][name]`]?.trim();
-        if (name) {  // only add if name not empty
-            items.push({
-                name,
-                unitPrice: Number(body[`extraItems[${index}][unitPrice]`]) || 0,
-                quantity: Number(body[`extraItems[${index}][quantity]`]) || 1,
-            })
-        }
-        index++;
-    }
-    return items
+    return body.extraItems.map((item: any) => ({
+        name: item.name?.trim(),
+        unitPrice: Number(item.unitPrice) || 0,
+        quantity: Number(item.quantity) || 1,
+    }))
 }
 
 // create new event function (admin only)
@@ -88,24 +81,47 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
 // get own all events function
 export const getMyEvents = async (req: AuthRequest, res: Response) => {
     try {
-
-        const page = Math.max(parseInt(req.query.page as string) || 1, 1)
-        const limit = 6
-        const skip = (page - 1) * limit
-
-
+        const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+        const limit = Math.max(parseInt(req.query.limit as string) || 6, 1);
+        const skip = (page - 1) * limit;
+        
+        // Get filter parameters
+        const searchTerm = req.query.search as string || '';
+        const typeFilter = req.query.type as string || '';
+        const statusFilter = req.query.status as string || '';
+        
         const userId = req.user?._id;
-
-        const [events, total] = await Promise.all([
-            Event.find({ userId })
-                .sort({ date: -1 })
-                .skip(skip)
-                .limit(limit),
-
-            Event.countDocuments({ userId }),
-        ])
-
-        res.status(200).json({
+        
+        // Build query object
+        const query: any = { userId };
+        
+        // Add search term filtering
+        if (searchTerm) {
+            query.$or = [
+                { title: { $regex: searchTerm, $options: 'i' } },
+                { location: { $regex: searchTerm, $options: 'i' } },
+                { description: { $regex: searchTerm, $options: 'i' } }
+            ];
+        }
+        
+        // Add type filter
+        if (typeFilter) {
+            query.type = typeFilter
+        }
+        
+        // Add status filter
+        if (statusFilter) {
+            query.status = statusFilter
+        }
+        
+        const total = await Event.countDocuments(query)
+        
+        const events = await Event.find(query)
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limit);
+        
+        return res.status(200).json({
             success: true,
             page,
             limit,
@@ -113,13 +129,13 @@ export const getMyEvents = async (req: AuthRequest, res: Response) => {
             totalPages: Math.ceil(total / limit),
             count: events.length,
             data: events,
-        })
-
+        });
+        
     } catch (err: any) {
+        console.error("Get my events error:", err)
         res.status(500).json({
             message: err?.message
         })
-
     }
 }
 
@@ -180,8 +196,9 @@ export const updateEvent = async (req: AuthRequest, res: Response) => {
         if (req.body.basePrice !== undefined)
             updateData.basePrice = Number(req.body.basePrice);
 
-        const extraItems = parseExtraItems(req.body);
-        if (extraItems.length) updateData.extraItems = extraItems;
+
+        const extraItems = parseExtraItems(req.body)
+            updateData.extraItems = extraItems
 
 
         if (req.body.imageRemoved === "true") {

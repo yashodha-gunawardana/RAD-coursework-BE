@@ -40,4 +40,4 @@ export const handleMulterError = (err: any, req: any, res: any, next: any) => {
     res.status(500).json({ message: "File upload error" });
 }
 
-export const uploadEventImage = upload.single("image");
+export const uploadEventImage = upload.single("image")
