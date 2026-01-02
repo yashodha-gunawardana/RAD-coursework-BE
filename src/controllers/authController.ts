@@ -14,16 +14,24 @@ export const registerUser = async (req: Request, res: Response) => {
     try {
         const { fullname, email, password, role} = req.body;
 
-        if (!fullname || !email || !password || !role) {
+        if (!fullname || !email || !password) {
             return res.status(400).json({
                 message: "All fields are required.."
             })
         }
 
         // only user and vendor roles allowed at registration
-        if (role !== Role.USER && role !== Role.VENDOR) {
+       /* if (role !== Role.USER && role !== Role.VENDOR) {
             return res.status(400).json({
                 message: "Invalid role. Only USER or VENDOR allowed during registration."
+            })
+        }*/
+        
+        // default role is user anyway
+        let requestedRole = role?.toUpperCase()
+        if (requestedRole && !["USER", "VENDOR"].includes(requestedRole)) {
+            return res.status(400).json({
+                message: "Invalid role, Only USER or VENDOR allowed during registraation"
             })
         }
 
