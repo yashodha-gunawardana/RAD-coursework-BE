@@ -182,6 +182,20 @@ export const requestVendor = async (req: AuthRequest, res: Response) => {
             })
         }
 
+        if (user.vendorStatus === VendorStatus.APPROVED) {
+            return res.status(400).json({
+                message: "You are already and approved vendor"
+            })
+        }
+
+        user.vendorStatus = VendorStatus.PENDING
+        await user.save()
+
+        res.status(200).json({
+            message: "Vendor request sumbitted successfully, Awaiting admin approval.",
+            data: { VendorStatus: user.vendorStatus }
+        })
+
     } catch (err) {
 
     }
