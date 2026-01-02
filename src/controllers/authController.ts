@@ -322,12 +322,11 @@ export const rejectVendor = async (req: AuthRequest, res: Response) => {
 
 
 // delete users
-// delete user function
 export const deleteUser = async (req: AuthRequest, res: Response) => {
     try {
         const { id } = req.params
 
-        // only admin can delete users
+
         if (!req.user?.roles.includes(Role.ADMIN)) {
             return res.status(403).json({
                 message: "Only admin can delete users"
@@ -342,9 +341,29 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
             })
         }
 
+        if (user._id.toString() === req.user._id.toString()) {
+            return res.status(400).json({
+                message: "Admin cannot delete themselves"
+            })
+        }
+
+        await User.findByIdAndDelete(id)
+
+        res.status(200).json({
+            message: "User deleted successfully",
+            data: {
+                id: user._id,
+                fullname: user.fullname,
+                email: user.email
+            }
+        })
+
     } catch (err) {
-        
-    }    
+        console.error("Delete user error:", err)
+        res.status(500).json({
+            message: "Server error"
+        })
+    }
 }
 
 
