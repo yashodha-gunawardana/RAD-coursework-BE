@@ -320,6 +320,34 @@ export const rejectVendor = async (req: AuthRequest, res: Response) => {
     }
 }
 
+
+// delete users
+// delete user function
+export const deleteUser = async (req: AuthRequest, res: Response) => {
+    try {
+        const { id } = req.params
+
+        // only admin can delete users
+        if (!req.user?.roles.includes(Role.ADMIN)) {
+            return res.status(403).json({
+                message: "Only admin can delete users"
+            })
+        }
+
+        const user = await User.findById(id)
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+
+    } catch (err) {
+        
+    }    
+}
+
+
 // refresh token & generate a new access token function
 export const handleRefreshToken = async (req: AuthRequest, res: Response) => {
     try {
