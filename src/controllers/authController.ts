@@ -270,6 +270,49 @@ export const approveVendor = async (req: AuthRequest, res: Response) => {
         })
 
     } catch (err) {
+        console.error("Approve vendor error:", err)
+        res.status(500).json({ 
+            message: "Server error" 
+        })
+    }
+}
+
+
+// reject vendor request
+export const rejectVendor = async (req: AuthRequest, res: Response) => {
+    try {
+        const { id } = req.params
+
+        const user = await User.findById(id)
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+
+        if (user.vendorStatus !== VendorStatus.PENDING) {
+            return res.status(400).json({ 
+                message: "No pending vendor request for this user" 
+            })
+        }
+
+
+        // remove vendor role rejection
+        user.vendorStatus = VendorStatus.REJECTED
+        await user.save()
+
+        
+        await sendEmail(
+            user.email,
+            "Vendor Request Rejected",
+            `Dear ${user.fullname}, unfortunately your request to become a vendor has been rejected. 
+                Please contact support for more information.`
+        )
+        res.status(200).json({ 
+            message: "Vendor request rejected" 
+        })
+
+    } catch (err) {
 
     }
 }
