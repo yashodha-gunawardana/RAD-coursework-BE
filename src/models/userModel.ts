@@ -33,7 +33,7 @@ const userSchema = new Schema<IUser>(
         // address: { type: String, required: true },
         // phone: { type: String, required: true },
         roles: { type: [String], enum: Object.values(Role), default: [Role.USER] },
-        approved: { type: String, enum: Object.values(Status), default: Status.PENDING }
+        approved: { type: String, enum: Object.values(Status), default: Status.APPROVED }
     },
     { timestamps: true }
 )

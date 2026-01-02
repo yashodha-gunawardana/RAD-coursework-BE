@@ -10,6 +10,13 @@ const router = Router();
 
 // public
 router.get("/", getAllVendors)
+
+
+// self
+router.put("/me", authenticate, uploadImage, handleMulterError, updateOwnVendorProfile)
+
+
+// public
 router.get("/:id", getVendorById)
 
 // admin only
@@ -17,8 +24,6 @@ router.post("/", authenticate, requiredRole([Role.ADMIN]), uploadImage, handleMu
 router.put("/:id", authenticate, requiredRole([Role.ADMIN]), uploadImage, handleMulterError, updateVendor)
 router.delete("/:id", authenticate, requiredRole([Role.ADMIN]), deleteVendor)
 
-// self
-router.put("/me", authenticate, uploadImage, handleMulterError, updateOwnVendorProfile)
 
 
 export default router

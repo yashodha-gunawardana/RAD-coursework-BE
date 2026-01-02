@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import Vendor from "../models/vendorModel";
 import { AuthRequest } from "../middleware/authMiddleware";
-import { count } from "console";
 import { Role } from "../models/userModel";
 
 
@@ -37,7 +36,9 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
             priceRange,
             description:description || undefined,
             image,
-            isAvailable: isAvailable === "true" || isAvailable === true, 
+            isAvailable: isAvailable !== undefined
+                ? isAvailable === "true" || isAvailable === true
+                : true,
             addedBy: req.user._id // track which admin added the vendor
         })
         await newVendor.save()
@@ -57,13 +58,47 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
 
 
 // get all vendors function (public)
-export const getAllVendors = async (req: Request, res: Response) => {
+export const getAllVendors = async (req: AuthRequest, res: Response) => {
     try {
-        const vendors = await Vendor.find({ isAvailable: true })
+
+        const page = Math.max(parseInt(req.query.page as string) || 1, 1);
+        const limit = Math.max(parseInt(req.query.limit as string) || 6, 1);
+        const skip = (page - 1) * limit;
+
+
+        const filter: any = {};
+
+        if (req.query.search) {
+            filter.$or = [
+                { name: { $regex: req.query.search, $options: "i" } },
+                { contact: { $regex: req.query.search, $options: "i" } },
+                { description: { $regex: req.query.search, $options: "i" } },
+            ]
+        }
+
+        if (req.query.category) {
+            filter.category = req.query.category
+        }
+
+        if (req.query.isAvailable !== undefined) {
+            filter.isAvailable = req.query.isAvailable === "true"
+        }
+    
+        const vendors = await Vendor.find(filter)
             .select("-addedBy")
             .sort({ createdAt: -1 })
+            .limit(limit)
+            .skip(skip)
+
+        
+        const total = await Vendor.countDocuments(filter)
 
         return res.status(200).json({
+            success: true,
+            page,
+            limit,
+            totalItems: total,
+            totalPages: Math.ceil(total / limit),
             count: vendors.length,
             data: vendors
         })    
@@ -78,7 +113,7 @@ export const getAllVendors = async (req: Request, res: Response) => {
 
 
 // get vendor by id function (public)
-export const getVendorById = async (req: Request, res: Response) => {
+export const getVendorById = async (req: AuthRequest, res: Response) => {
     try {
         const vendor = await Vendor.findById(req.params.id).select("-addedBy")
 
@@ -121,21 +156,28 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
             })
         }
 
-        const { name, category, contact, priceRange, description, isAvailable } = req.body
+        const { name, category, contact, priceRange, description, isAvailable, imageRemoved } = req.body
 
         if (name !== undefined) vendor.name = name
         if (category !== undefined) vendor.category = category
         if (contact !== undefined) vendor.contact = contact
         if (priceRange !== undefined) vendor.priceRange = priceRange
         if (description !== undefined) vendor.description = description
+
         if (isAvailable !== undefined) {
             vendor.isAvailable = isAvailable === "true" || isAvailable === true
         }
+        
 
-
-        if  (req.file) {
+        if (imageRemoved === "true") {
+            vendor.image = undefined
+            
+        } else if (req.file) {
+            // New image uploaded
             vendor.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`
         }
+        
+
         await vendor.save()
 
         return res.status(201).json({
@@ -164,13 +206,21 @@ export const updateOwnVendorProfile = async (req: AuthRequest, res: Response) =>
             })
         }
 
-        const { name, category, contact, priceRange, description } = req.body
-            if (name) vendor.name = name
-            if (category) vendor.category = category
-            if (contact) vendor.contact = contact
-            if (priceRange) vendor.priceRange = priceRange
-            if (description) vendor.description = description
-            if (req.file) vendor.image = req.file.buffer.toString("base64")
+        const { name, category, contact, priceRange, description, isAvailable } = req.body
+        
+        if (name !== undefined) vendor.name = name
+        if (category !== undefined) vendor.category = category
+        if (contact !== undefined) vendor.contact = contact
+        if (priceRange !== undefined) vendor.priceRange = priceRange
+        if (description !== undefined) vendor.description = description
+
+        if (isAvailable !== undefined) {
+            vendor.isAvailable = isAvailable === "true" || isAvailable === true
+        }
+
+        if (req.file) {
+            vendor.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+        }
 
         await vendor.save()
 
