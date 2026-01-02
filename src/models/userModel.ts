@@ -6,7 +6,8 @@ export enum Role {
     USER = "USER"
 }
 
-export enum Status {
+export enum VendorStatus {
+    NOT_REQUESTED = "NOT_REQUESTED",
     PENDING = "PENDING",
     APPROVED = "APPROVED",
     REJECTED = "REJECTED"
@@ -21,7 +22,7 @@ export interface IUser extends Document {
     // address?: string
     // phone?: string
     roles: Role[]  // array of roles assigned to user
-    approved: Status
+    vendorStatus: VendorStatus
 }
 
 // Database structure
@@ -33,7 +34,7 @@ const userSchema = new Schema<IUser>(
         // address: { type: String, required: true },
         // phone: { type: String, required: true },
         roles: { type: [String], enum: Object.values(Role), default: [Role.USER] },
-        approved: { type: String, enum: Object.values(Status), default: Status.APPROVED }
+        vendorStatus: { type: String, enum: Object.values(VendorStatus), default: VendorStatus.NOT_REQUESTED }
     },
     { timestamps: true }
 )

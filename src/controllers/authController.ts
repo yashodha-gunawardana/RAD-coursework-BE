@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import User, { Role, Status } from "../models/userModel";
+import User, { Role, VendorStatus } from "../models/userModel";
 import bcrypt from "bcryptjs";
 import { signAccessToken } from "../utils/tokens";
 import { AuthRequest } from "../middleware/authMiddleware";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "..utils/email";
 
 
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
@@ -12,7 +13,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
 // register user function
 export const registerUser = async (req: Request, res: Response) => {
     try {
-        const { fullname, email, password, role} = req.body;
+        const { fullname, email, password} = req.body;
 
         if (!fullname || !email || !password) {
             return res.status(400).json({
@@ -26,15 +27,7 @@ export const registerUser = async (req: Request, res: Response) => {
                 message: "Invalid role. Only USER or VENDOR allowed during registration."
             })
         }*/
-        
-        // default role is user anyway
-        let requestedRole = role?.toUpperCase()
-        if (requestedRole && !["USER", "VENDOR"].includes(requestedRole)) {
-            return res.status(400).json({
-                message: "Invalid role, Only USER or VENDOR allowed during registraation"
-            })
-        }
-
+    
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({
@@ -44,36 +37,32 @@ export const registerUser = async (req: Request, res: Response) => {
 
         const hashedPassowrd = await bcrypt.hash(password, 10);
 
-        // vendor needs a admin approval
-        const approvelStatus = role == Role.VENDOR ? Status.PENDING : Status.APPROVED;
-
         const newUser = new User({
             fullname,
             email,
             password: hashedPassowrd,
             // address,
             // phone,
-            roles: [role],
-            approved: approvelStatus
+            roles: [Role.USER],
+            vendorStatus: VendorStatus.NOT_REQUESTED
         })
         await newUser.save();
 
         res.status(201).json({
-            message: 
-                role == Role.VENDOR
-                    ? "Vendor registered successfully, Waiting for approval.."
-                    : "User registered successfully..",
+            message: "Registration successfull..You can now log in.",
             data: {
                 id: newUser._id,
+                fullname: newUser.fullname,
                 email: newUser.email,
                 roles: newUser.roles,
-                approved: newUser.approved
+                approved: newUser.vendorStatus
             }        
         })
 
     } catch (err: any) {
+        console.error("Registration error: ", err)
         res.status(500).json({
-            message: err?.message
+            message: "Server error during registration"
         })
     }
 }
@@ -118,7 +107,7 @@ export const loginUser = async (req: Request, res: Response) => {
                 fullname: user.fullname,
                 email: user.email,
                 roles: user.roles,
-                approved: user.approved,
+                approved: user.vendorStatus,
                 accessToken
             }
         })
@@ -157,7 +146,7 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
                 fullname: user.fullname,
                 email: user.email,
                 roles: user.roles,
-                approved: user.approved
+                approved: user.vendorStatus
             }
         });
 
@@ -166,6 +155,35 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
         res.status(500).json({
             message: err?.message || "Server error"
         });
+    }
+}
+
+
+// request to become vendor
+export const requestVendor = async (req: AuthRequest, res: Response) => {
+    try {
+
+        if (!req.user?._id) {
+            return res.status(401).json({
+                message: "Unauthorized"
+            })
+        }
+
+        const user = await User.findById(req.user._id)
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+
+        if (user.vendorStatus === VendorStatus.PENDING) {
+            return res.status(400).json({
+                message: "Your vendor request is already pending"
+            })
+        }
+
+    } catch (err) {
+
     }
 }
 
