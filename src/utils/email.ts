@@ -11,6 +11,13 @@ export const sendEmail = async (to: string, subject: string, text: string) => {
                 pass: process.env.SMTP_PASS
             }
         })
+
+        await transporter.sendEmail({
+            from: process.env.SMTP_USER,
+            to,
+            subject,
+            text
+        })
     } catch(err) {
 
     }
