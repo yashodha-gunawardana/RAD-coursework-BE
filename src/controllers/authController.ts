@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { signAccessToken } from "../utils/tokens";
 import { AuthRequest } from "../middleware/authMiddleware";
 import jwt from "jsonwebtoken";
-import { sendEmail } from "..utils/email";
+import { sendEmail } from "../utils/email";
 
 
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
@@ -313,7 +313,10 @@ export const rejectVendor = async (req: AuthRequest, res: Response) => {
         })
 
     } catch (err) {
-
+        console.error("Reject vendor error:", err)
+        res.status(500).json({ 
+            message: "Server error" 
+        })
     }
 }
 

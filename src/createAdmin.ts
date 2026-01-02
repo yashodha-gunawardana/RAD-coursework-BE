@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-import User, { Role, Status } from "./models/userModel";
+import User, { Role, VendorStatus } from "./models/userModel";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -23,7 +23,7 @@ const createAdmin = async () => {
       email: "admin@system.com",
       password: hashedPassword,
       roles: [Role.ADMIN],
-      approved: Status.APPROVED
+      vendorStatus: VendorStatus.APPROVED
     });
 
     console.log("Admin created successfully");
