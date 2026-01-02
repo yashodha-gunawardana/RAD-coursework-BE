@@ -197,10 +197,72 @@ export const requestVendor = async (req: AuthRequest, res: Response) => {
         })
 
     } catch (err) {
-
+        console.error("Vendor request error:", err)
+        res.status(500).json({ 
+            message: "Server error" 
+        })
     }
 }
 
+
+// get all users
+export const getAllUsers = async (req: AuthRequest, res: Response) => {
+    try {
+        const users = await User.find({}).select("-password")
+
+        const formattedUsers = users.map(user => ({
+            id: user._id,
+            fullname: user.fullname,
+            email: user.email,
+            roles: user.roles,
+            vendorStatus: user.vendorStatus
+        }));
+
+        res.status(200).json({
+            message: "Users fetched successfully",
+            data: formattedUsers
+        });
+
+    } catch (err: any) {
+        console.error("Get all users error:", err)
+        res.status(500).json({ 
+            message: "Server error" 
+        })
+    }
+}
+
+
+// approved vendor request
+export const approveVendor = async (req: AuthRequest, res: Response) => {
+    try {
+        const { id } = req.params
+
+        const user = await User.findById(id)
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found."
+            })
+        }
+
+        if (user.vendorStatus !== VendorStatus.PENDING) {
+            return res.status(400).json({ 
+                message: "No pending vendor request for this user" 
+            })
+        }
+
+
+        // vendor role approve
+        if (!user.roles.includes(Role.VENDOR)) {
+            user.roles.push(Role.VENDOR)
+        }
+
+        user.vendorStatus = VendorStatus.APPROVED
+        await user.save()
+
+    } catch (err) {
+
+    }
+}
 
 // refresh token & generate a new access token function
 export const handleRefreshToken = async (req: AuthRequest, res: Response) => {
