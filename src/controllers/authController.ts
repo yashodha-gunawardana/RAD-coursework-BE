@@ -259,6 +259,16 @@ export const approveVendor = async (req: AuthRequest, res: Response) => {
         user.vendorStatus = VendorStatus.APPROVED
         await user.save()
 
+        await sendEmail(
+            user.email,
+            "Vendor Requset Approved",
+            `Congratulations, ${user.fullname}! Your request to become a vendor has been approved.
+                You now have full access to vendor features.`
+        )
+        res.status(200).json({
+            message: "Vendor request approved successfully"
+        })
+
     } catch (err) {
 
     }
