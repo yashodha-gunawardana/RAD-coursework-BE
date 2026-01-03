@@ -4,7 +4,6 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import { Role } from "../models/userModel";
 
 
-
 // create a vendor function (only admin)
 export const createVendor = async (req: AuthRequest, res: Response) => {
     try {
@@ -171,7 +170,7 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
 
         if (imageRemoved === "true") {
             vendor.image = undefined
-            
+
         } else if (req.file) {
             // New image uploaded
             vendor.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`

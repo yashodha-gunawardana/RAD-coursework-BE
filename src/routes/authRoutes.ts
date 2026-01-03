@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { registerUser, loginUser, getMyDetails, rejectVendor, requestVendor, getAllUsers, approveVendor } from "../controllers/authController";
+import { registerUser, loginUser, getMyDetails, rejectVendor, requestVendor, getAllUsers, approveVendor, deleteUser } from "../controllers/authController";
 import { authenticate } from "../middleware/authMiddleware";
 import { requiredRole } from "../middleware/roleMiddleware";
 import { Role } from "../models/userModel";
@@ -19,6 +19,7 @@ router.post("/request/vendor", authenticate, requiredRole([Role.USER]), requestV
 router.get("/users", authenticate, requiredRole([Role.ADMIN]), getAllUsers);
 router.post("/users/approve/:id", authenticate, requiredRole([Role.ADMIN]), approveVendor);
 router.post("/users/reject/:id", authenticate, requiredRole([Role.ADMIN]), rejectVendor);
+router.delete("/users/:id", authenticate, requiredRole([Role.ADMIN]), deleteUser);
 
 
 export default router

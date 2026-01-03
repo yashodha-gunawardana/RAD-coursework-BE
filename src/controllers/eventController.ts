@@ -112,12 +112,14 @@ export const getMyEvents = async (req: AuthRequest, res: Response) => {
             query.status = statusFilter
         }
         
-        const total = await Event.countDocuments(query)
         
         const events = await Event.find(query)
-            .sort({ date: -1 })
+            .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit);
+
+        const total = await Event.countDocuments(query)
+
         
         return res.status(200).json({
             success: true,
@@ -136,6 +138,55 @@ export const getMyEvents = async (req: AuthRequest, res: Response) => {
         })
     }
 }
+
+
+// get all event
+export const getAllEvents = async (req: AuthRequest, res: Response) => {
+    try {
+        const page = Math.max(parseInt(req.query.page as string) || 1, 1)
+        const limit = Math.max(parseInt(req.query.limit as string) || 6, 1)
+        const skip = (page - 1) * limit
+
+        const searchTerm = req.query.search as string || ''
+        const typeFilter = req.query.type as string || ''
+        const statusFilter = req.query.status as string || ''
+
+        const query: any = {}
+
+        if (searchTerm) {
+            query.$or = [
+                { title: { $regex: searchTerm, $options: 'i' } },
+                { location: { $regex: searchTerm, $options: 'i' } },
+                { description: { $regex: searchTerm, $options: 'i' } }
+            ]
+        }
+
+        if (typeFilter) query.type = typeFilter
+        if (statusFilter) query.status = statusFilter
+
+        const events = await Event.find(query)
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit)
+
+        const total = await Event.countDocuments(query)
+
+        res.json({
+            success: true,
+            page,
+            limit,
+            totalItems: total,
+            totalPages: Math.ceil(total / limit),
+            data: events
+        })
+
+    } catch (err: any) {
+        res.status(500).json({ 
+            message: err.message 
+        })
+    }
+}
+
 
 
 // get event by id function (user or admin)
