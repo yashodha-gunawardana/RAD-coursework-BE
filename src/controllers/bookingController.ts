@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import Event from "../models/eventModel";
-import Booking from "../models/bookingModel";
+import Booking, { BookingStatus }  from "../models/bookingModel";
 import { AuthRequest } from "../middleware/authMiddleware";
+import { Role } from "../models/userModel";
 
 
 // new booking create function (event owner / admin only)
@@ -174,6 +175,82 @@ export const deleteBooking = async (req: AuthRequest, res: Response) => {
     } catch (err: any) {
         return res.status(500).json({
             message: err?.message
+        })
+    }
+}
+
+
+// Get bookings assigned to logged-in vendor
+export const getVendorBookings = async (req: AuthRequest, res: Response) => {
+    try {
+        const vendorId = req.user?._id
+
+        const bookings = await Booking.find({ vendorId })
+            .populate("eventId", "title date location")
+            .populate("userId", "name email")
+            .sort({ createdAt: -1 })
+
+        res.status(200).json({
+            success: true,
+            count: bookings.length,
+            data: bookings
+        });
+
+    } catch (err: any) {
+        console.error("Get vendor bookings error:", err)
+        res.status(500).json({ 
+            message: err?.message 
+        })
+    }
+};
+
+// update status of a booking (vendor only)
+export const updateBookingStatus = async (req: AuthRequest, res: Response) => {
+    try {
+        
+        if (!req.user) {
+            return res.status(401).json({ 
+                message: "Unauthorized" 
+            })
+        }
+
+        const bookingId = req.params.id
+        const { status } = req.body
+
+        if (!Object.values(BookingStatus).includes(status)) {
+            return res.status(400).json({ 
+                message: "Invalid status" 
+            })
+        }
+
+        let booking;
+
+        if (req.user.roles?.includes(Role.ADMIN)) {
+            booking = await Booking.findById(bookingId)
+
+        } else {
+            booking = await Booking.findOne({ _id: bookingId, vendorId: req.user._id })
+        }
+
+        if (!booking) {
+            return res.status(404).json({ 
+                message: "Booking not found or not assigned to you" 
+            })
+        }
+
+        booking.status = status
+        await booking.save()
+
+        res.status(200).json({
+            success: true,
+            message: "Booking status updated successfully",
+            data: booking
+        })
+
+    } catch (err: any) {
+        console.error("Update booking status error:", err)
+        res.status(500).json({ 
+            message: err?.message 
         })
     }
 }

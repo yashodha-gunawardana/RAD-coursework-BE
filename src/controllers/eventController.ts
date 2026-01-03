@@ -335,7 +335,7 @@ export const getAllEventsForSelect = async (req: AuthRequest, res: Response) => 
             return res.status(401).json({ message: "Unauthorized" })
         }
         
-        const events = await Event.find({ userId: req.user._id })
+        const events = await Event.find({ status: "PLANNING" })
             .select("_id title date location")
             .sort({ createdAt: -1 })
         
@@ -343,7 +343,8 @@ export const getAllEventsForSelect = async (req: AuthRequest, res: Response) => 
             success: true,
             count: events.length,
             data: events
-        });
+        })
+        
     } catch (err: any) {
         console.error("Get events for dropdown error:", err)
         res.status(500).json({ 

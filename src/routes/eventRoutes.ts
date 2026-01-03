@@ -28,7 +28,7 @@ router.get("/my",authenticate, getMyEvents)
 router.get("/all", authenticate, requiredRole([Role.ADMIN]), getAllEvents)
 
 
-router.get("/all", authenticate, getAllEventsForSelect)
+router.get("/dropdown", authenticate, getAllEventsForSelect)
 
 router
     .route("/:id")

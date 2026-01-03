@@ -23,6 +23,8 @@ router.get("/", getAllVendors)
 // self
 router.put("/me", authenticate, uploadImage, handleMulterError, updateOwnVendorProfile)
 
+router.get("/dropdown", authenticate, getAllVendorsForSelect)
+
 
 // public
 router.get("/:id", getVendorById)
@@ -33,7 +35,6 @@ router.put("/:id", authenticate, requiredRole([Role.ADMIN]), uploadImage, handle
 router.delete("/:id", authenticate, requiredRole([Role.ADMIN]), deleteVendor)
 
 
-router.get("/all", authenticate, getAllVendorsForSelect)
 
 
 
