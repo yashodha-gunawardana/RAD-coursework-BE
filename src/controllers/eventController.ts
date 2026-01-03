@@ -327,3 +327,27 @@ export const deleteEvent = async (req: AuthRequest, res: Response) => {
         })
     }
 }
+
+// all events for dropdown
+export const getEventsForDropdown = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized" })
+        }
+        
+        const events = await Event.find({ userId: req.user._id })
+            .select("_id title date location")
+            .sort({ createdAt: -1 })
+        
+        return res.status(200).json({
+            success: true,
+            count: events.length,
+            data: events
+        });
+    } catch (err: any) {
+        console.error("Get events for dropdown error:", err)
+        res.status(500).json({ 
+            message: err?.message 
+        })
+    }
+}
