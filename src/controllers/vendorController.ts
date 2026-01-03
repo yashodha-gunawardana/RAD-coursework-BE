@@ -193,17 +193,39 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
 }
 
 
+export const getOwnVendorProfile = async (req: AuthRequest, res: Response) => {
+    try {
+
+        const vendor = await Vendor.findOne({ addedBy: req.user?._id })
+
+        if (!vendor) 
+            return res.status(404).json({ 
+                message: "Vendor profile not found" 
+        })
+
+        res.json({ 
+            success: true, 
+            data: vendor 
+        })
+
+    } catch (err) {
+        console.error(err)
+        res.status(500).json({ 
+            message: "Server error" 
+        })
+    }
+}
+
 // vendor update own profile
 export const updateOwnVendorProfile = async (req: AuthRequest, res: Response) => {
     try {
 
         const vendor = await Vendor.findOne({ addedBy: req.user?._id })
 
-        if (!vendor) {
-            return res.status(404).json({
-                message: "Vendor profile not found.."
-            })
-        }
+        if (!vendor) 
+        return res.status(404).json({ 
+            message: "Vendor profile not found" 
+        })
 
         const { name, category, contact, priceRange, description, isAvailable } = req.body
         

@@ -19,8 +19,8 @@ const router = Router();
 // public
 router.get("/", getAllVendors)
 
-
 // self
+router.get("/me", authenticate, getOwnVendorProfile)
 router.put("/me", authenticate, uploadImage, handleMulterError, updateOwnVendorProfile)
 
 router.get("/dropdown", authenticate, getAllVendorsForSelect)

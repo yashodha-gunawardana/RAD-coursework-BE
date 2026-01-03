@@ -127,7 +127,7 @@ export const updateBooking = async (req: AuthRequest, res: Response) => {
         const { id } = req.params // booking id
         const { status, notes } = req.body // new status
 
-        const updated = await Booking.findOneAndUpdate({ id: id, userId: req.user._id}, { status, notes }, { new: true })
+        const updated = await Booking.findOneAndUpdate({ _id: id, userId: req.user._id}, { status, notes }, { new: true })
 
         if (!updated) {
             return res.status(404).json({
@@ -180,14 +180,21 @@ export const deleteBooking = async (req: AuthRequest, res: Response) => {
 }
 
 
-// Get bookings assigned to logged-in vendor
+// get bookings assigned to logged-in vendor
 export const getVendorBookings = async (req: AuthRequest, res: Response) => {
     try {
-        const vendorId = req.user?._id
+
+        if (!req.user) {
+            return res.status(401).json({ 
+                message: "Unauthorized" 
+            })
+        }
+
+        const vendorId = req.user._id
 
         const bookings = await Booking.find({ vendorId })
-            .populate("eventId", "title date location")
-            .populate("userId", "name email")
+            .populate({ path: "eventId", select: "title date location" })
+            .populate({ path: "userId", select: "name email" })
             .sort({ createdAt: -1 })
 
         res.status(200).json({
@@ -202,7 +209,7 @@ export const getVendorBookings = async (req: AuthRequest, res: Response) => {
             message: err?.message 
         })
     }
-};
+}
 
 // update status of a booking (vendor only)
 export const updateBookingStatus = async (req: AuthRequest, res: Response) => {
