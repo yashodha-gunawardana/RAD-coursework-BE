@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Event, { IEvent, EventStatus } from "../models/eventModel";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { Role } from "../models/userModel";
+import { count } from "console";
 
 
 function parseExtraItems(body: any): any[] {
@@ -89,6 +90,12 @@ export const getMyEvents = async (req: AuthRequest, res: Response) => {
         const statusFilter = req.query.status as string || '';
         
         const userId = req.user?._id;
+
+        if (!userId) {
+            return res.status(401).json({
+                message: "User not authenticated"
+            })
+        }
         
         // Build query object
         const query: any = { userId };
@@ -161,22 +168,30 @@ export const getAllEvents = async (req: AuthRequest, res: Response) => {
             ]
         }
 
-        if (typeFilter) query.type = typeFilter
-        if (statusFilter) query.status = statusFilter
+        if (typeFilter) {
+            query.type = typeFilter
+        }
+
+        if (statusFilter) {
+            query.status = statusFilter
+        }
+
 
         const events = await Event.find(query)
+            .populate("userId", "name email")
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
 
         const total = await Event.countDocuments(query)
 
-        res.json({
+        res.status(200).json({
             success: true,
             page,
             limit,
             totalItems: total,
             totalPages: Math.ceil(total / limit),
+            count: events.length,
             data: events
         })
 

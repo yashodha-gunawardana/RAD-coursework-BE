@@ -2,16 +2,21 @@ import { Request, Response } from "express";
 import Event from "../models/eventModel";
 import Booking from "../models/bookingModel";
 import { AuthRequest } from "../middleware/authMiddleware";
-import { count } from "console";
-import { data } from "react-router-dom";
 
 
 // new booking create function (event owner / admin only)
 export const createBooking = async (req: AuthRequest, res: Response) => {
     try {
+
+        if (!req.user) {
+            return res.status(401).json({
+                message: "Unauthorized"
+            })
+        }
+
         const { eventId, vendorId, notes } = req.body
 
-        const event = await Event.findOne({ _id: eventId, userId: req.user._id })
+        const event = await Event.findById(eventId)
 
         if (!event) {
             return res.status(404).json({
@@ -28,7 +33,7 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
         await newBooking.save()
 
         const populatedBooking = await newBooking.populate(
-            "vendorTd",
+            "vendorId",
             "name category priceRange image"
         )
 
@@ -49,6 +54,13 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
 // get all booking of user function (event owner / admin only)
 export const getMyBooking = async (req: AuthRequest, res: Response) => {
     try {
+
+        if (!req.user) {
+            return res.status(401).json({
+                message: "Unauthorized"
+            })
+        }
+
         const bookings = await Booking.find({ userId: req.user._id })
             .populate("eventId", "title date location")
             .populate("vendorId", "name category image")
@@ -70,6 +82,13 @@ export const getMyBooking = async (req: AuthRequest, res: Response) => {
 // get booking by id function (event owner / admin only)
 export const getBookingById = async (req: AuthRequest, res: Response) => {
     try {
+
+        if (!req.user) {
+            return res.status(401).json({
+                message: "Unauthorized"
+            })
+        }
+
         const { id } = req.params
 
         const booking = await Booking.findOne({ _id: id, userId: req.user._id })
@@ -97,10 +116,17 @@ export const getBookingById = async (req: AuthRequest, res: Response) => {
 // update booking status function (event owner / admin only)
 export const updateBooking = async (req: AuthRequest, res: Response) => {
     try {
-        const { status, notes } = req.body // new status
-        const { id } = req.params // booking id
 
-        const updated = await Booking.findByIdAndUpdate({ id: id, userId: req.user._id}, { status, notes }, { new: true })
+        if (!req.user) {
+            return res.status(401).json({
+                message: "Unauthorized"
+            })
+        }
+
+        const { id } = req.params // booking id
+        const { status, notes } = req.body // new status
+
+        const updated = await Booking.findOneAndUpdate({ id: id, userId: req.user._id}, { status, notes }, { new: true })
 
         if (!updated) {
             return res.status(404).json({
@@ -124,9 +150,16 @@ export const updateBooking = async (req: AuthRequest, res: Response) => {
 // delete booking function (event owner / admin only)
 export const deleteBooking = async (req: AuthRequest, res: Response) => {
     try {
+
+        if (!req.user) {
+            return res.status(401).json({
+                message: "Unauthorized"
+            })
+        }
+
         const { id } = req.params
 
-        const deleted = await Booking.findByIdAndDelete({ _id: id, userId: req.user._id })
+        const deleted = await Booking.findOneAndDelete({ _id: id, userId: req.user._id })
 
         if (!deleted) {
             return res.status(404).json({

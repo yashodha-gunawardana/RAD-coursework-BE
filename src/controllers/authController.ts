@@ -211,11 +211,12 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
         const users = await User.find({}).select("-password")
 
         const formattedUsers = users.map(user => ({
-            id: user._id,
+            _id: user._id,
             fullname: user.fullname,
             email: user.email,
             roles: user.roles,
-            vendorStatus: user.vendorStatus
+            vendorStatus: user.vendorStatus,
+            
         }));
 
         res.status(200).json({
@@ -233,8 +234,15 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
 
 
 // approved vendor request
-export const approveVendor = async (req: AuthRequest, res: Response) => {
+/*export const approveVendor = async (req: AuthRequest, res: Response) => {
     try {
+
+        if (!req.user?.roles.includes(Role.ADMIN)) {
+            return res.status(403).json({ 
+                message: "Only admin can approv vendor request"
+             })
+        }
+
         const { id } = req.params
 
         const user = await User.findById(id)
@@ -281,6 +289,13 @@ export const approveVendor = async (req: AuthRequest, res: Response) => {
 // reject vendor request
 export const rejectVendor = async (req: AuthRequest, res: Response) => {
     try {
+
+        if (!req.user?.roles.includes(Role.ADMIN)) {
+            return res.status(403).json({ 
+                message: "Only admin can reject vendor request"
+             })
+        }
+
         const { id } = req.params
 
         const user = await User.findById(id)
@@ -318,7 +333,111 @@ export const rejectVendor = async (req: AuthRequest, res: Response) => {
             message: "Server error" 
         })
     }
-}
+}*/
+// approved vendor request
+export const approveVendor = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user?.roles.includes(Role.ADMIN)) {
+            return res.status(403).json({ 
+                message: "Only admin can approve vendor request" 
+            });
+        }
+
+        const { id } = req.params;
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found."
+            });
+        }
+
+        if (user.vendorStatus !== VendorStatus.PENDING) {
+            return res.status(400).json({ 
+                message: "No pending vendor request for this user" 
+            });
+        }
+
+        // Add VENDOR role if not already present
+        if (!user.roles.includes(Role.VENDOR)) {
+            user.roles.push(Role.VENDOR);
+        }
+
+        user.vendorStatus = VendorStatus.APPROVED;
+        await user.save();
+
+        // Send email — failure won't crash the approval
+        try {
+            await sendEmail(
+                user.email,
+                "Vendor Request Approved", // ← Fixed typo
+                `Congratulations, ${user.fullname}!\n\nYour request to become a vendor has been approved.\nYou now have full access to vendor features.`
+            );
+        } catch (emailErr) {
+            console.error("Approval email failed for:", user.email, emailErr);
+        }
+
+        res.status(200).json({
+            message: "Vendor request approved successfully"
+        });
+
+    } catch (err) {
+        console.error("Approve vendor error:", err);
+        res.status(500).json({ 
+            message: "Server error" 
+        });
+    }
+};
+
+// reject vendor request
+export const rejectVendor = async (req: AuthRequest, res: Response) => {
+    try {
+        if (!req.user?.roles.includes(Role.ADMIN)) {
+            return res.status(403).json({ 
+                message: "Only admin can reject vendor request" 
+            });
+        }
+
+        const { id } = req.params;
+
+        const user = await User.findById(id);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        if (user.vendorStatus !== VendorStatus.PENDING) {
+            return res.status(400).json({ 
+                message: "No pending vendor request for this user" 
+            });
+        }
+
+        user.vendorStatus = VendorStatus.REJECTED;
+        await user.save();
+
+        // Send rejection email — safe from failure
+        try {
+            await sendEmail(
+                user.email,
+                "Vendor Request Rejected",
+                `Dear ${user.fullname},\n\nUnfortunately, your request to become a vendor has been rejected.\nPlease contact support for more information.`
+            );
+        } catch (emailErr) {
+            console.error("Rejection email failed for:", user.email, emailErr);
+        }
+
+        res.status(200).json({ 
+            message: "Vendor request rejected successfully"
+        });
+
+    } catch (err) {
+        console.error("Reject vendor error:", err);
+        res.status(500).json({ 
+            message: "Server error" 
+        });
+    }
+};
 
 
 // delete users

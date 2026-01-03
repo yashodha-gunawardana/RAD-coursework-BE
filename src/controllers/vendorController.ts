@@ -268,3 +268,25 @@ export const deleteVendor = async (req: AuthRequest, res: Response) => {
         })
     }
 }
+
+
+// for dropdown 
+export const getVendorsForDropdown = async (req: AuthRequest, res: Response) => {
+    try {
+        
+        const vendors = await Vendor.find({ isAvailable: true })
+            .select("_id name category image priceRange")
+            .sort({ name: 1 });
+        
+        return res.status(200).json({
+            success: true,
+            count: vendors.length,
+            data: vendors
+        })
+    } catch (err: any) {
+        console.error("Get vendors for dropdown error:", err)
+        res.status(500).json({ 
+            message: err?.message 
+        })
+    }
+}
