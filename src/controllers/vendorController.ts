@@ -271,7 +271,7 @@ export const deleteVendor = async (req: AuthRequest, res: Response) => {
 
 
 // for dropdown 
-export const getVendorsForDropdown = async (req: AuthRequest, res: Response) => {
+export const getAllVendorsForSelect = async (req: AuthRequest, res: Response) => {
     try {
         
         const vendors = await Vendor.find({ isAvailable: true })

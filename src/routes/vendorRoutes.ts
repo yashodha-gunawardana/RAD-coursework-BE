@@ -1,5 +1,13 @@
 import { Router } from "express";
-import { getAllVendors, createVendor, getVendorById, updateVendor, deleteVendor, updateOwnVendorProfile } from "../controllers/vendorController";
+import { 
+    getAllVendors, 
+    createVendor, 
+    getVendorById, 
+    updateVendor, 
+    deleteVendor, 
+    updateOwnVendorProfile, 
+    getAllVendorsForSelect
+} from "../controllers/vendorController";
 import { authenticate } from "../middleware/authMiddleware";
 import { requiredRole } from "../middleware/roleMiddleware";
 import { Role } from "../models/userModel";
@@ -23,6 +31,9 @@ router.get("/:id", getVendorById)
 router.post("/", authenticate, requiredRole([Role.ADMIN]), uploadImage, handleMulterError, createVendor)
 router.put("/:id", authenticate, requiredRole([Role.ADMIN]), uploadImage, handleMulterError, updateVendor)
 router.delete("/:id", authenticate, requiredRole([Role.ADMIN]), deleteVendor)
+
+
+router.get("/all", authenticate, getAllVendorsForSelect)
 
 
 
