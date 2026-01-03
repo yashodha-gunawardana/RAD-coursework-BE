@@ -1,5 +1,13 @@
 import { Router } from "express";
-import { createEvent, getMyEvents, getEventById, updateEvent, deleteEvent, getAllEvents } from "../controllers/eventController";
+import { 
+    createEvent, 
+    getMyEvents, 
+    getEventById, 
+    updateEvent, 
+    deleteEvent, 
+    getAllEvents,
+    getAllEventsForSelect
+ } from "../controllers/eventController";
 import { authenticate } from "../middleware/authMiddleware";
 import { requiredRole } from "../middleware/roleMiddleware";
 import { Role } from "../models/userModel";
@@ -17,9 +25,10 @@ router.post("/", authenticate, requiredRole([Role.ADMIN]), uploadImage, handleMu
     });
 
 router.get("/my",authenticate, getMyEvents)
-router.get("/all", authenticate, requiredRole([Role.ADMIN]), getAllEvents
-)
+router.get("/all", authenticate, requiredRole([Role.ADMIN]), getAllEvents)
 
+
+router.get("/all", authenticate, getAllEventsForSelect)
 
 router
     .route("/:id")

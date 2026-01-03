@@ -329,7 +329,7 @@ export const deleteEvent = async (req: AuthRequest, res: Response) => {
 }
 
 // all events for dropdown
-export const getEventsForDropdown = async (req: AuthRequest, res: Response) => {
+export const getAllEventsForSelect = async (req: AuthRequest, res: Response) => {
     try {
         if (!req.user) {
             return res.status(401).json({ message: "Unauthorized" })
