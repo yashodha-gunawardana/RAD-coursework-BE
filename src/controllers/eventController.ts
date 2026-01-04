@@ -255,9 +255,10 @@ export const getEventById = async (req: AuthRequest, res: Response) => {
 export const updateEvent = async (req: AuthRequest, res: Response) => {
     try {
 
-        if (!req.user?.roles.includes(Role.ADMIN)) {
+        /*if (!req.user?.roles.includes(Role.ADMIN)) {
             return res.status(403).json({ message: "Only admin can update events" });
-        }
+        }*/
+       const event = await Event.findById(req.params.id)
 
         const updateData: any = {};
 
