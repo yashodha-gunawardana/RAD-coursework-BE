@@ -48,6 +48,8 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
 
         const extraItems = parseExtraItems({ extraItems: rawExtraItems })
 
+        const extrasTotal = extraItems.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+        const totalPrice = event.basePrice + extrasTotal
 
         const newBooking = new Booking ({
             eventId,
