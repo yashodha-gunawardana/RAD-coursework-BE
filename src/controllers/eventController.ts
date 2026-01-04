@@ -335,9 +335,12 @@ export const getAllEventsForSelect = async (req: AuthRequest, res: Response) => 
             return res.status(401).json({ message: "Unauthorized" })
         }
         
-        const events = await Event.find({ status: "PLANNING" })
-            .select("_id title date location")
-            .sort({ createdAt: -1 })
+        const events = await Event.find({
+            userId: req.user._id,           
+            status: "PLANNING"              
+        })
+        .select("_id title date location basePrice extraItems")  
+        .sort({ date: -1 });
         
         return res.status(200).json({
             success: true,

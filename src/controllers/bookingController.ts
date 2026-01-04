@@ -55,7 +55,11 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
             eventId,
             vendorId,
             userId: req.user._id,
-            notes
+            notes,
+            extraItems,
+            totalPrice,
+            status:BookingStatus.PENDING,
+            bookedAt: new Date()
         })
         await newBooking.save()
 
