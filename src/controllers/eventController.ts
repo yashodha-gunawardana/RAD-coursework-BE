@@ -35,6 +35,14 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
             isPackage = false
         } = req.body;
 
+        const isAdmin = req.user?.roles.includes(Role.ADMIN)
+
+        if (isPackage && !isAdmin) {
+            return res.status(403).json({
+                message: "Only admin can create packages"
+            })
+        }
+
 
         if (!title || !type || !date || !location || !basePrice) {
             return res.status(400).json({ message: "Missing required fields" });
@@ -61,6 +69,8 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
             status,
             image,
             extraItems,
+            isPackage,
+            createdByAdmin: isAdmin
         })
 
         res.status(201).json({
