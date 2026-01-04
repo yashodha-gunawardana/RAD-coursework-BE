@@ -194,6 +194,10 @@ export const deleteBooking = async (req: AuthRequest, res: Response) => {
 
         const { id } = req.params
 
+        const query = req.user.roles?.includes(Role.ADMIN)
+            ? { _id: id }
+            : { _id: id, userId: req.user._id }
+
         const deleted = await Booking.findOneAndDelete({ _id: id, userId: req.user._id })
 
         if (!deleted) {
