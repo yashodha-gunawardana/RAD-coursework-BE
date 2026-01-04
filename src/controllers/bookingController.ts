@@ -158,8 +158,12 @@ export const updateBooking = async (req: AuthRequest, res: Response) => {
             })
         }
 
-        const { id } = req.params // booking id
-        const { status, notes } = req.body // new status
+        const { id } = req.params 
+        const { status, notes } = req.body 
+
+        const query = req.user.roles?.includes(Role.ADMIN)
+            ? { _id: id }
+            : { _id: id, userId: req.user._id }
 
         const updated = await Booking.findOneAndUpdate({ _id: id, userId: req.user._id}, { status, notes }, { new: true })
 

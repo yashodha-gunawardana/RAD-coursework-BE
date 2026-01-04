@@ -33,6 +33,10 @@ export interface IEvent extends Document {
          quantity?: number
     }[];
 
+    isPackage: boolean
+    createdByAdmin: boolean
+
+
     status: EventStatus
     createdAt: Date
     updatedAt: Date
@@ -57,7 +61,9 @@ const eventSchema = new Schema<IEvent> (
             quantity: { type: Number, default: 1 }
           }
         ],
-          
+
+        isPackage: { type: Boolean, default: false },
+        createdByAdmin: { type: Boolean, default: false },
 
         status: { type: String, enum: Object.values(EventStatus), default: EventStatus.PLANNING }
     },

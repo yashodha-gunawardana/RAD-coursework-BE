@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import Event, { IEvent, EventStatus } from "../models/eventModel";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { Role } from "../models/userModel";
-import { count } from "console";
 
 
 function parseExtraItems(body: any): any[] {
@@ -20,9 +19,9 @@ function parseExtraItems(body: any): any[] {
 export const createEvent = async (req: AuthRequest, res: Response) => {
     try {
 
-        if (!req.user?.roles.includes(Role.ADMIN)) {
+        /*if (!req.user?.roles.includes(Role.ADMIN)) {
             return res.status(403).json({ message: "Only admin can add events" });
-        }
+        }*/
 
         const {
             title,
@@ -33,6 +32,7 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
             description,
             status = "PLANNING",
             basePrice,
+            isPackage = false
         } = req.body;
 
 
@@ -339,6 +339,7 @@ export const getAllEventsForSelect = async (req: AuthRequest, res: Response) => 
             userId: req.user._id,           
             status: "PLANNING"              
         })
+
         .select("_id title date location basePrice extraItems")  
         .sort({ date: -1 });
         
