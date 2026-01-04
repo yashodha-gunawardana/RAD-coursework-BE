@@ -92,6 +92,10 @@ export const getMyBooking = async (req: AuthRequest, res: Response) => {
             })
         }
 
+        const query = req.user.roles?.includes(Role.ADMIN) 
+            ? {}  // all bookings
+            : { userId: req.user._id }
+
         const bookings = await Booking.find({ userId: req.user._id })
             .populate("eventId", "title date location")
             .populate("vendorId", "name category image")
