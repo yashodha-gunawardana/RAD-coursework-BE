@@ -6,7 +6,8 @@ import {
     updateVendor, 
     deleteVendor, 
     updateOwnVendorProfile, 
-    getAllVendorsForSelect
+    getAllVendorsForSelect,
+    getOwnVendorProfile
 } from "../controllers/vendorController";
 import { authenticate } from "../middleware/authMiddleware";
 import { requiredRole } from "../middleware/roleMiddleware";

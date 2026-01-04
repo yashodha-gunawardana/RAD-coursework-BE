@@ -15,6 +15,12 @@ export interface IBooking extends Document {
     status : BookingStatus
     bookedAt: Date
     notes?: string
+    extraItems?: {
+        name: string
+        unitPrice: number
+        quantity: number
+    }[]
+    totalPrice?: number
 }
 
 // Database structure
@@ -24,7 +30,15 @@ const bookingSchema = new Schema<IBooking> (
         vendorId: { type: Schema.Types.ObjectId, ref: "Vendor", required: true },
         userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
         status: { type: String, enum: Object.values(BookingStatus), default: BookingStatus.PENDING },
-        notes: String
+        notes: String,
+        extraItems: [
+            {
+                name: { type: String, required: true },
+                unitPrice: { type: Number, required: true },
+                quantity: { type: Number, required: true, default: 1 }
+            }
+        ],
+        totalPrice: { type: Number, required: true, default: 0 }
     },
     { timestamps: true }
 )

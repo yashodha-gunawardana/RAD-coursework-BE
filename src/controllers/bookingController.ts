@@ -5,9 +5,21 @@ import { AuthRequest } from "../middleware/authMiddleware";
 import { Role } from "../models/userModel";
 
 
+function parseExtraItems(body: any): any[] {
+    if (!body.extraItems || !Array.isArray(body.extraItems)) return []
+    return body.extraItems.map((item: any) => ({
+        name: item.name?.trim(),
+        unitPrice: Number(item.unitPrice) || 0,
+        quantity: Number(item.quantity) || 1,
+    }))
+}
+
+
 // new booking create function (event owner / admin only)
 export const createBooking = async (req: AuthRequest, res: Response) => {
     try {
+
+        const { eventId, vendorId, notes, extraItems: rawExtraItems } = req.body
 
         if (!req.user) {
             return res.status(401).json({
@@ -15,15 +27,27 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
             })
         }
 
-        const { eventId, vendorId, notes } = req.body
+        if (!eventId || !vendorId) 
+        return res.status(400).json({ 
+            message: "Missing required fields" 
+        })
 
         const event = await Event.findById(eventId)
+        
+        if (!event) 
+        return res.status(404).json({ 
+            message: "Event not found" 
+        })
+
 
         if (!event) {
             return res.status(404).json({
                 message: "Event not found or not owned by you.."
             })
         }
+
+        const extraItems = parseExtraItems({ extraItems: rawExtraItems })
+
 
         const newBooking = new Booking ({
             eventId,
