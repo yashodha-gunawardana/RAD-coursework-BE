@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import Vendor from "../models/vendorModel";
 import { AuthRequest } from "../middleware/authMiddleware";
-import { Role } from "../models/userModel";
+import { Role, VendorStatus } from "../models/userModel";
+import User from "../models/userModel";
+import mongoose from "mongoose";
 
 
 // create a vendor function (only admin)
@@ -14,8 +16,25 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
             })
         }
 
-        const { name, category, contact, priceRange, description, isAvailable } = req.body
+        const { userId, name, category, contact, priceRange, description, isAvailable } = req.body
 
+
+        const user = await User.findById(userId)
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            })
+        }
+
+
+        if (!user.roles.includes(Role.VENDOR)) {
+            user.roles.push(Role.VENDOR)
+            user.vendorStatus = VendorStatus.APPROVED
+            await user.save()
+        }
+
+        
         if (!name || !category || !contact || !priceRange) {
             return res.status(400).json({
                 message: "Required fields: name, category, contact, priceRange"
@@ -54,6 +73,58 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
         })
     }
 }
+
+// Get vendor by logged-in user
+/*export const getVendorByUserId = async (req: AuthRequest, res: Response) => {
+    try {
+        const vendor = await Vendor.findOne({ addedBy: req.user?._id }).populate("addedBy", "name email");
+
+        if (!vendor) {
+            return res.status(404).json({ message: "Vendor not found for this user" });
+        }
+
+        return res.status(200).json({ success: true, data: vendor });
+    } catch (err: any) {
+        console.error("Error fetching vendor by user:", err);
+        return res.status(500).json({ message: err?.message });
+    }
+};*/
+// vendorController.ts - getVendorByUserId function
+export const getVendorByUserId = async (req: AuthRequest, res: Response) => {
+    try {
+        console.log("getVendorByUserId called for user:", req.user);
+        
+        if (!req.user?._id) {
+            return res.status(401).json({
+                message: "User not authenticated"
+            });
+        }
+
+        // Find vendor by the logged-in user's ID
+        const vendor = await Vendor.findOne({ 
+            addedBy: req.user._id 
+        }).populate("addedBy", "fullname email");
+
+        if (!vendor) {
+            // For create form, it's OK if no vendor exists
+            return res.status(200).json({
+                success: true,
+                data: null  // Explicitly return null
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: vendor
+        });
+
+    } catch (err: any) {
+        console.error("Error in getVendorByUserId:", err);
+        return res.status(500).json({
+            message: err?.message || "Internal server error"
+        });
+    }
+};
 
 
 // get all vendors function (public)
@@ -112,7 +183,7 @@ export const getAllVendors = async (req: AuthRequest, res: Response) => {
 
 
 // get vendor by id function (public)
-export const getVendorById = async (req: AuthRequest, res: Response) => {
+/*export const getVendorById = async (req: AuthRequest, res: Response) => {
     try {
         const vendor = await Vendor.findById(req.params.id).select("-addedBy")
 
@@ -133,7 +204,39 @@ export const getVendorById = async (req: AuthRequest, res: Response) => {
             message: err?.message
         })
     }
-}
+}*/
+export const getVendorById = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        
+        // Validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: "Invalid vendor ID format"
+            });
+        }
+
+        const vendor = await Vendor.findById(id)
+            .populate("addedBy", "fullname email");
+
+        if (!vendor) {
+            return res.status(404).json({
+                message: "Vendor not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            data: vendor
+        });
+
+    } catch (err: any) {
+        console.error("Get vendor by ID error:", err);
+        return res.status(500).json({
+            message: err?.message || "Internal server error"
+        });
+    }
+};
 
 
 // update vendor function (only admin)'
@@ -196,6 +299,12 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
 export const getOwnVendorProfile = async (req: AuthRequest, res: Response) => {
     try {
 
+        if (!req.user?._id) {
+            return res.status(401).json({ 
+                message: "User not authenticated" 
+            });
+        }
+
         const vendor = await Vendor.findOne({ addedBy: req.user?._id })
 
         if (!vendor) 
@@ -219,6 +328,12 @@ export const getOwnVendorProfile = async (req: AuthRequest, res: Response) => {
 // vendor update own profile
 export const updateOwnVendorProfile = async (req: AuthRequest, res: Response) => {
     try {
+
+        if (!req.user?._id) {
+            return res.status(401).json({ 
+                message: "User not authenticated" 
+            });
+        }
 
         const vendor = await Vendor.findOne({ addedBy: req.user?._id })
 

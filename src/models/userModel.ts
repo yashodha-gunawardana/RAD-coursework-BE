@@ -19,8 +19,6 @@ export interface IUser extends Document {
     fullname: string
     email: string
     password: string
-    // address?: string
-    // phone?: string
     roles: Role[]  // array of roles assigned to user
     vendorStatus: VendorStatus
 }
@@ -29,10 +27,8 @@ export interface IUser extends Document {
 const userSchema = new Schema<IUser>(
     {
         fullname: { type: String, required: true },
-        email: { type: String, unique: true, lowercase: true },
+        email: { type: String, unique: true, lowercase: true, required: true },
         password: { type: String, required: true },
-        // address: { type: String, required: true },
-        // phone: { type: String, required: true },
         roles: { type: [String], enum: Object.values(Role), default: [Role.USER] },
         vendorStatus: { type: String, enum: Object.values(VendorStatus), default: VendorStatus.NOT_REQUESTED }
     },

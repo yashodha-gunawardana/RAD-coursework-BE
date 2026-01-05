@@ -37,7 +37,7 @@ app.use("/api/v1/events", EventRoutes)
 app.use("/api/v1/vendors", VendorRoutes)
 app.use("/api/v1/bookings", BookingRoutes)
 app.use("/api/v1/guests", GuestRoutes)
-app.use("/api/v1/budget", BudgetRoutes)
+app.use("/api/v1/budgets", BudgetRoutes)
 
 
 mongoose.connect(MONGO_URL).then(() => {

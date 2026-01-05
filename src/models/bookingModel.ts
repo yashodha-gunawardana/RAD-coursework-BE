@@ -30,17 +30,20 @@ const bookingSchema = new Schema<IBooking> (
         vendorId: { type: Schema.Types.ObjectId, ref: "Vendor", required: true },
         userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
         status: { type: String, enum: Object.values(BookingStatus), default: BookingStatus.PENDING },
+        bookedAt: { type: Date, default: Date.now },  
         notes: String,
         extraItems: [
             {
                 name: { type: String, required: true },
                 unitPrice: { type: Number, required: true },
-                quantity: { type: Number, required: true, default: 1 }
+                quantity: { type: Number, required: true, default: 1 },
+                _id: false
             }
         ],
         totalPrice: { type: Number, required: true, default: 0 }
     },
     { timestamps: true }
 )
+bookingSchema.index({ userId: 1, eventId: 1, vendorId: 1 }, { unique: true });
 
 export default mongoose.model<IBooking>("Booking", bookingSchema)

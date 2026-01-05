@@ -3,6 +3,7 @@ import Event from "../models/eventModel";
 import Booking, { BookingStatus }  from "../models/bookingModel";
 import { AuthRequest } from "../middleware/authMiddleware";
 import { Role } from "../models/userModel";
+import Vendor from "../models/vendorModel";
 
 
 function parseExtraItems(body: any): any[] {
@@ -83,35 +84,34 @@ export const createBooking = async (req: AuthRequest, res: Response) => {
 
 
 // get all booking of user function (event owner / admin only)
+// controllers/bookingController.ts → getMyBooking
 export const getMyBooking = async (req: AuthRequest, res: Response) => {
     try {
-
-        if (!req.user) {
-            return res.status(401).json({
-                message: "Unauthorized"
-            })
+        const user = req.user;
+        if (!user) {
+            return res.status(401).json({ message: "Unauthorized" });
         }
 
-        const query = req.user.roles?.includes(Role.ADMIN) 
-            ? {}  // all bookings
-            : { userId: req.user._id }
+        // Commit: Admin sees ALL bookings, regular user sees only their own
+        const query = user.roles.includes(Role.ADMIN)
+            ? {} // Admin: no filter → all bookings
+            : { userId: user._id }; // User: only their bookings
 
-        const bookings = await Booking.find({ userId: req.user._id })
-            .populate("eventId", "title date location")
+        const bookings = await Booking.find(query)
+            .populate("eventId", "title date location basePrice")
             .populate("vendorId", "name category image")
-            .sort({ createdAt: -1 })
-         
-        return res.status(200).json({
-            count: bookings.length,
-            data: bookings 
-        })
+            .sort({ createdAt: -1 });
 
+        return res.status(200).json({
+            success: true,
+            count: bookings.length,
+            data: bookings,
+        });
     } catch (err: any) {
-        return res.status(500).json({
-            message: err?.message
-        })
+        console.error("getMyBooking error:", err);
+        return res.status(500).json({ message: "Failed to fetch bookings" });
     }
-}
+};
 
 
 // get booking by id function (event owner / admin only)
@@ -232,9 +232,15 @@ export const getVendorBookings = async (req: AuthRequest, res: Response) => {
             })
         }
 
-        const vendorId = req.user._id
+        const vendor = await Vendor.findOne({ userId: req.user._id})
 
-        const bookings = await Booking.find({ vendorId })
+        if (!vendor) {
+            return res.status(404).json({
+                message: "Vendor profile not found"
+            })
+        }
+
+        const bookings = await Booking.find({ vendorId: vendor._id })
             .populate({ path: "eventId", select: "title date location" })
             .populate({ path: "userId", select: "name email" })
             .sort({ createdAt: -1 })

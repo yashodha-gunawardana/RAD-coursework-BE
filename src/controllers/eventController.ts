@@ -58,7 +58,7 @@ export const createEvent = async (req: AuthRequest, res: Response) => {
             }
 
         const event = await Event.create({
-            userId: req.user._id,
+            userId: req.user?._id,
             title: title.trim(),
             type,
             date: new Date(date),
@@ -258,7 +258,23 @@ export const updateEvent = async (req: AuthRequest, res: Response) => {
         /*if (!req.user?.roles.includes(Role.ADMIN)) {
             return res.status(403).json({ message: "Only admin can update events" });
         }*/
-       const event = await Event.findById(req.params.id)
+        const event = await Event.findById(req.params.id)
+
+        if (!event) {
+            return res.status(404).json({ 
+                message: "Event not found" 
+            });
+        }
+
+        const currentUserId = req.user?._id;
+        const isOwner = event.userId.toString() === currentUserId?.toString();
+        const isAdmin = req.user?.roles?.includes(Role.ADMIN);
+
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ 
+                message: "Only owner or admin can update events" 
+            });
+        }
 
         const updateData: any = {};
 
@@ -308,7 +324,7 @@ export const updateEvent = async (req: AuthRequest, res: Response) => {
 
 
 // delete event function (admin)
-export const deleteEvent = async (req: AuthRequest, res: Response) => {
+/*export const deleteEvent = async (req: AuthRequest, res: Response) => {
     try {
 
         if (!req.user?.roles.includes(Role.ADMIN)) {
@@ -323,6 +339,37 @@ export const deleteEvent = async (req: AuthRequest, res: Response) => {
             return res.status(404).json({
                 message: "Event not found.."
             });
+        }
+
+        await event.deleteOne()
+
+        res.status(200).json({
+            success: true,
+            message: "Event deleted successfully.."
+        })
+
+    } catch (err: any) {
+        res.status(500).json({
+            message: err?.message
+        })
+    }
+}*/
+export const deleteEvent = async (req: AuthRequest, res: Response) => {
+    try {
+        const event = await Event.findById(req.params.id);  
+
+        if (!event) {
+            return res.status(404).json({
+                message: "Event not found.."
+            });
+        }
+
+        const currentUserId = req.user?._id;
+        const isOwner = event.userId.toString() === currentUserId?.toString();
+        const isAdmin = req.user?.roles?.includes(Role.ADMIN);
+
+        if (!isOwner && !isAdmin) {
+            return res.status(403).json({ message: "Only owner or admin can delete events" });
         }
 
         await event.deleteOne()

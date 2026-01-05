@@ -7,7 +7,8 @@ import {
     deleteVendor, 
     updateOwnVendorProfile, 
     getAllVendorsForSelect,
-    getOwnVendorProfile
+    getOwnVendorProfile,
+    getVendorByUserId
 } from "../controllers/vendorController";
 import { authenticate } from "../middleware/authMiddleware";
 import { requiredRole } from "../middleware/roleMiddleware";
@@ -17,18 +18,21 @@ import { handleMulterError, uploadImage } from "../middleware/upload";
 
 const router = Router();
 
+
 // public
 router.get("/", getAllVendors)
+
+// public
+router.get("/:id", getVendorById)
+
+// Get vendor details for the logged-in vendor
+router.get("/by-user", authenticate, getVendorByUserId);
+
+router.get("/dropdown", authenticate, getAllVendorsForSelect)
 
 // self
 router.get("/me", authenticate, getOwnVendorProfile)
 router.put("/me", authenticate, uploadImage, handleMulterError, updateOwnVendorProfile)
-
-router.get("/dropdown", authenticate, getAllVendorsForSelect)
-
-
-// public
-router.get("/:id", getVendorById)
 
 // admin only
 router.post("/", authenticate, requiredRole([Role.ADMIN]), uploadImage, handleMulterError, createVendor)

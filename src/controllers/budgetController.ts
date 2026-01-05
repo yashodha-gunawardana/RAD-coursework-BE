@@ -1,336 +1,120 @@
-import { Request, Response } from "express";
-import Budget, { IBudget, BudgetStatus } from "../models/budgetModel";
+import { Response } from "express";
+import Budget, { BudgetStatus } from "../models/budgetModel";
 import Event from "../models/eventModel";
 import { AuthRequest } from "../middleware/authMiddleware";
 import mongoose from "mongoose";
+import { Role } from "../models/userModel";
 
+const isValid = (id: string) => mongoose.Types.ObjectId.isValid(id);
 
-
-// role check
-const hasAceess = (user: any, roles: string[]) => user?.roles?.some((r: string) => roles.includes(r))
-
-
-// check valid objectId
-const isValid = (id: string) => mongoose.Types.ObjectId.isValid(id)
-
-
-// create or update budget function 
 export const createOrUpdateBudget = async (req: AuthRequest, res: Response) => {
     try {
+        const { eventId, selectedItems = [] } = req.body;
+        const userId = req.user?._id;
 
-        if (!hasAceess(req.user, ["USER", "ADMIN"])) {
-            return res.status(403).json({
-                message: "Access denied. Only USER or ADMIN can create or update budgets.."
-            });
-        }
+        if (!isValid(eventId)) return res.status(400).json({ message: "Invalid event ID" });
 
-        const { eventId, selectedItems = [] } = req.body
-        const userId = req.user._id
+        const event = await Event.findById(eventId);
+        if (!event) return res.status(404).json({ message: "Event not found" });
 
+        // Map and validate items against the Event's allowed extras
+        const validItems = selectedItems.map((item: any) => {
+            const eventExtra = event.extraItems?.find((e: any) => e.name === item.name);
+            if (!eventExtra) throw new Error(`Extra item "${item.name}" not available for this event`);
+            
+            return {
+                name: eventExtra.name,
+                unitPrice: eventExtra.unitPrice,
+                quantity: item.quantity || 1
+            };
+        });
 
-        if (!isValid(eventId)) {
-            return res.status(400).json({
-                message: "Invalid event ID.."
-            })
-        }
-
-        const event = await Event.findById(eventId)
-
-        if (!event) {
-            return res.status(404).json({
-                message: "Event not found.."
-            })
-        }
-
-        const validItems: any[] = []
-        let calculatedExtraTotal = 0
-
-        for (const item of selectedItems) {
-            const eventExtraItem = event.extraItems?.find(
-                (e: any) => e.name === item.name
-            )
-
-            if (!eventExtraItem) {
-                return res.status(400).json({
-                    message: `Extra item "${item.name}" not available for this event..`
-                })
-            }
-
-            const quantity = item.quantity || 1
-            const total = eventExtraItem.unitPrice * quantity
-
-
-            validItems.push({
-                name: eventExtraItem.name,
-                unitPrice: eventExtraItem.unitPrice,
-                quantity,
-                total: total // temporary total
-
-            })
-            calculatedExtraTotal += total
-        }
-
-        const basePrice = event.basePrice || 0
-
-        // check budget already exists
-        let budget = await Budget.findOne({ userId, eventId })
-
-        // store whether this is an update or create operation
-        const isUpdate = budget ? true : false
+        // Find or Create manually to ensure the 'save' hook triggers
+        let budget = await Budget.findOne({ userId, eventId });
 
         if (budget) {
-            budget.selectedItems = validItems
-            budget.basePrice = basePrice
-            budget.extraTotal = calculatedExtraTotal
-            budget.totalAmount = basePrice + calculatedExtraTotal
-
-            await budget.save()
-        
+            budget.selectedItems = validItems;
+            budget.basePrice = event.basePrice;
+            await budget.save();
         } else {
-            // if busget doesn't exist, create new one
-            budget = await Budget.create({
+            budget = new Budget({
                 userId,
                 eventId,
-                basePrice,
-                selectedItems: validItems,
-                extraTotal: calculatedExtraTotal,
-                totalAmount: basePrice + calculatedExtraTotal
-            })
+                basePrice: event.basePrice,
+                selectedItems: validItems
+            });
+            await budget.save();
         }
 
-        return res.status(isUpdate ? 200 : 201).json({
-            message: isUpdate ? "Budget updated successfully.." : "Budget created successfully..",
-            data: {
-                budgetId: budget._id,
-                eventId: budget.eventId,
-                userId: budget.userId,
-                basePrice: budget.basePrice,
-                selectedItems: budget.selectedItems,
-                extraTotal: budget.extraTotal,
-                totalAmount: budget.totalAmount,
-                status: budget.status,
-                createdAt: budget.createdAt,
-                updatedAt: budget.updatedAt
-            }
-        })
-
+        return res.status(200).json({ 
+            message: "Budget saved successfully", 
+            data: budget 
+        });
     } catch (err: any) {
-        return res.status(500).json({
-            message: err?.message
-        })
+        return res.status(400).json({ message: err.message });
     }
-}
+};
 
-
-// get budget by id function 
 export const getBudgetId = async (req: AuthRequest, res: Response) => {
     try {
+        const { budgetId } = req.params;
+        if (!isValid(budgetId)) return res.status(400).json({ message: "Invalid budget ID" });
 
-        if (!hasAceess(req.user, ["USER", "ADMIN"])) {
-            return res.status(403).json({
-                message: "Access denied. Only USER or ADMIN can create or update budgets.."
-            });
-        }
-
-        const { budgetId } = req.params
-        const userId = req.user._id
-
-
-        if (!isValid(budgetId)) {
-            return res.status(400).json({
-                message: "Invalid budget ID.."
-            })
-        }
-
-        const budget = await Budget.findOne({ _id: budgetId, userId })
+        const budget = await Budget.findOne({ _id: budgetId, userId: req.user?._id })
             .populate("eventId", "title date location basePrice")
-            .populate("userId", "name email")
+            .populate("userId", "name email");
 
-        
-            if (!budget) {
-            return res.status(404).json({
-                message: "Budget not found.."
-            })
-        }
-
-        return res.status(200).json({
-            message: "Budget retrieved successfully..",
-            data: budget
-        })
-
+        if (!budget) return res.status(404).json({ message: "Budget not found" });
+        return res.status(200).json({ data: budget });
     } catch (err: any) {
-        return res.status(500).json({
-            message: err?.message
-        })
+        return res.status(500).json({ message: err.message });
     }
-}
+};
 
-
-// get budget by event id function
-export const getBudgetByEventId = async (req: AuthRequest, res: Response) => {
-    try {
-
-        if (!hasAceess(req.user, ["USER", "ADMIN"])) {
-            return res.status(403).json({
-                message: "Access denied. Only USER or ADMIN can create or update budgets.."
-            });
-        }
-
-        const { eventId } = req.params
-        const userId = req.user._id
-
-        if (!isValid(eventId)) {
-            return res.status(400).json({
-                message: "Invalid event ID.."
-            })
-        }        
-
-        const budget = await Budget.findOne({ eventId, userId })
-            .populate("eventId", "title date location basePrice")
-            .populate("userId", "name email")
-
-        if (!budget) {
-            return res.status(404).json({
-                message: "Budget not found for this event.."
-            })
-        }
-
-        return res.status(200).json({
-            message: "Budget retrieved successfully..",
-            data: budget
-        })
-
-    } catch (err: any) {
-        return res.status(500).json({
-            message: err?.message
-        })
-    }
-}
-
-
-// get all budgets function
 export const getAllUserBudgets = async (req: AuthRequest, res: Response) => {
     try {
+        const budgets = await Budget.find({ userId: req.user?._id })
+            .populate("eventId", "title date")
+            .sort({ createdAt: -1 });
 
-        if (!hasAceess(req.user, ["USER", "ADMIN"])) {
-            return res.status(403).json({
-                message: "Access denied. Only USER or ADMIN can create or update budgets.."
-            });
-        }
-
-        const userId = req.user._id
-
-        const budgets = await Budget.find({ userId })
-            .populate("eventId", "title date location basePrice")
-            .sort({ createdAt: -1 })
-
-
-        return res.status(200).json({
-            message: "Budgets retrieved successfully..",
-            count: budgets.length,
-            data: budgets
-        })
-
+        return res.status(200).json({ count: budgets.length, data: budgets });
     } catch (err: any) {
-        return res.status(500).json({
-            message: err?.message
-        })
+        return res.status(500).json({ message: err.message });
     }
-}
+};
 
-
-// update budget status function
 export const updateBudgetStatus = async (req: AuthRequest, res: Response) => {
     try {
-
-        if (!hasAceess(req.user, ["USER", "ADMIN"])) {
-            return res.status(403).json({
-                message: "Access denied. Only USER or ADMIN can create or update budgets.."
-            });
-        }
-
-        const { budgetId } = req.params
-        const { status } = req.body
-        const userId = req.user._id
-
-        if (!isValid(budgetId)) {
-            return res.status(400).json({
-                message: "Invalid budget ID.."
-            })
-        }  
+        const { budgetId } = req.params;
+        const { status } = req.body;
 
         if (!Object.values(BudgetStatus).includes(status)) {
-            return res.status(400).json({
-                message: "Invalid status. Must be Draft, Confirmed or Paid.."
-            })
+            return res.status(400).json({ message: "Invalid status" });
         }
 
-        const budget = await Budget.findOne({ _id: budgetId, userId })
+        const budget = await Budget.findOneAndUpdate(
+            { _id: budgetId, userId: req.user?._id },
+            { status },
+            { new: true }
+        );
 
-        if (!budget) {
-            return res.status(404).json({
-                message: "Budget not found.."
-            })
-        }
-
-        // update budget status
-        budget.status = status
-
-        await budget.save()
-
-        return res.status(200).json({
-            message: "Budget status updated successfully..",
-            data: budget
-        })
-
+        if (!budget) return res.status(404).json({ message: "Budget not found" });
+        return res.status(200).json({ message: "Status updated", data: budget });
     } catch (err: any) {
-        return res.status(500).json({
-            message: err?.message
-        })
+        return res.status(500).json({ message: err.message });
     }
-}
+};
 
-
-// delete budget function
 export const deleteBudget = async (req: AuthRequest, res: Response) => {
     try {
+        const query: any = { _id: req.params.budgetId };
+        if (!req.user?.roles.includes(Role.ADMIN)) query.userId = req.user?._id;
 
-        if (!hasAceess(req.user, ["USER", "ADMIN"])) {
-            return res.status(403).json({
-                message: "Access denied. Only USER or ADMIN can create or update budgets.."
-            });
-        }
+        const budget = await Budget.findOneAndDelete(query);
+        if (!budget) return res.status(404).json({ message: "Budget not found" });
 
-        const { budgetId } = req.params
-        const userId = req.user._id
-
-        if (!isValid(budgetId)) {
-            return res.status(400).json({
-                message: "Invalid budget ID.."
-            })
-        }  
-
-        const query: any = { _id: budgetId }
-
-        if (!req.user.roles.includes("ADMIN")) {
-            query.userId = userId
-        }
-
-        const budget = await Budget.findOneAndDelete(query)
-
-        if (!budget) {
-            return res.status(404).json({
-                message: "Budget not found.."
-            })
-        }
-
-        return res.status(200).json({
-            message: "Budget deleted successfully.."
-        })
-
+        return res.status(200).json({ message: "Budget deleted" });
     } catch (err: any) {
-        return res.status(500).json({
-            message: err?.message
-        })
+        return res.status(500).json({ message: err.message });
     }
-}
+};

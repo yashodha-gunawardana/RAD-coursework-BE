@@ -16,7 +16,8 @@ import { handleMulterError, uploadImage } from "../middleware/upload";
 const router = Router();
 
 
-router.post("/", authenticate, requiredRole([Role.ADMIN]), uploadImage, handleMulterError, createEvent)
+// router.post("/", authenticate, requiredRole([Role.ADMIN]), uploadImage, handleMulterError, createEvent)
+ router.post("/", authenticate, uploadImage, handleMulterError, createEvent)
  
     router.post("/test-upload", uploadImage, (req, res) => {
         console.log("Test upload - body:", req.body);
