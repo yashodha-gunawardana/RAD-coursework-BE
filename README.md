@@ -1,4 +1,4 @@
-# Eventora Backend - Event Planning & Booking System 🎉
+# 🎉 Eventora Backend - Event Planning & Booking System 
 
 ## 📌 Project Overview
 
