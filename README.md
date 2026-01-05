@@ -1,4 +1,4 @@
-# 🎉 Eventora Backend - Event Planning & Booking System 
+# 🎉 Eventora  - Event Planning & Booking System 
 
 ## 📌 Project Overview
 
@@ -186,6 +186,112 @@ The backend provides secure, role-based RESTful APIs with full CRUD operations, 
 | DELETE | `/budgets/:budgetId` | Delete a budget | User / Admin |
 
 ---
+
+
+# 🖥️ Frontend Application Details
+
+## 📌 Frontend Overview
+
+The Eventora Frontend is a modern, responsive web application built using React + TypeScript.
+It consumes the Eventora Backend REST APIs to provide an intuitive UI for event planning, vendor booking, budget tracking, and role-based access control.
+
+The frontend follows Rapid Application Development (RAD) principles with reusable components, fast iteration, and user-centred design.
+
+## ⚡ Frontend Features
+
+  - User registration & login (JWT-based authentication)
+  - Role-based UI (Admin, User, Vendor)
+  - Event creation, editing & scheduling
+  - Vendor browsing and booking
+  - Budget tracking dashboard
+  - Image upload previews
+  - Fully responsive UI (mobile, tablet, desktop)
+
+## 🛠 Frontend Technologies Used
+
+  - **Framework**: React + TypeScript
+  - **Styling**: TailwindCSS
+  - **State Management**: Redux Toolkit
+  - **Routing**: React Router DOM
+  - **API Communication**: Axios
+  - **Icons & UI**: React Feather
+  - **Build Tool**: Vite
+  - **Deployment**: Vercel
+
+## 📂 Project Structure
+
+- **EVENTORA-FE/**
+  - **src/** 
+    - **assets/** 
+    - **components/** – Reusable components
+      - `EventForm.tsx `
+      - `VendorForm.tsx `
+      - `...` (forms, cards, tables)
+    - **contexts/** – React contexts
+      - `authContext.tsx ` – Auth state management
+    - **layouts/** – Page layouts
+      - `DashBoardLayout.tsx`
+    - **pages/** – Route pages
+      - **dashboard/**
+        - `Dashboard.tsx `
+        - `EventPage.tsx `
+        - `VendorPage.tsx `
+        - `BookingPage.tsx `
+        - `UsersPage.tsx ` 
+      - `LandingPage.tsx `
+      - `LoginRegister.tsx`
+    - **redux/** – Global state (Redux)
+      - **slices/** – Auth, events, etc.
+      - `store.ts`
+    - **services/ ** – API calls
+      - `api.t ` – Axios instance with interceptors
+      - `auth.ts `
+      - `events.ts `
+      - `vendor.ts `
+      - `booking.ts `
+      - `budget.ts `
+    - `App.tsx ` – Main app component
+    - `main.tsx ` – Entry point + router
+  - **public/ 📁**
+  - `index.html`
+  - `package.json`
+  - `tailwind.config.js`
+  - `tsconfig.json`
+  - `vite.config.ts`
+  - `README.md`
+ 
+## 🚀 Setup and Run Instructions
+
+ ### 1️⃣ Create or Clone the Repository
+
+   # Create new Vite React TypeScript project
+      npm create vite@latest . -- --template react-ts
+
+  or
+
+  # Clone the repository
+    git clone https://github.com/yashodha-gunawardana/RAD-coursework-FE
+    cd EVENTORA-FE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
