@@ -309,6 +309,8 @@ The frontend follows Rapid Application Development (RAD) principles with reusabl
   - Linked Frontend: `https://eventora-planning-fe.vercel.app/`
 
 
+
+
   
   
 
