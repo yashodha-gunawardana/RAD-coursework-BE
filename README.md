@@ -264,14 +264,53 @@ The frontend follows Rapid Application Development (RAD) principles with reusabl
 
  ### 1️⃣ Create or Clone the Repository
 
-   # Create new Vite React TypeScript project
-      npm create vite@latest . -- --template react-ts
+   #### Create new Vite React TypeScript project
+      npm create vite@latest 
 
   or
 
-  # Clone the repository
+  #### Clone the repository
     git clone https://github.com/yashodha-gunawardana/RAD-coursework-FE
     cd EVENTORA-FE
+
+ ### 2️⃣ Install Dependencies
+     npm install
+
+ ### 3️⃣ Start Development Server (Vite)
+       npm run dev
+       
+ ### 4️⃣ Install TailwindCSS
+    npm install tailwindcss @tailwindcss/vite   
+
+ ### 5️⃣ Install Redux Toolkit for State Management
+    npm install @reduxjs/toolkit react-redux
+
+ ### 6️⃣ Install React Router for Routing
+    npm install react-router-dom
+ 
+ ### 7️⃣ Install Axios for API Calls
+     npm install axios
+
+ ### 8️⃣ Build for Production
+    npm run build
+
+ 
+## ⚡ Scripts in `package.json`
+      "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
+      }
+      
+## 🌐 API Base URL
+
+  - Local: `http://localhost:5173`
+  - Deployed Backend: `https://eventora-be.onrender.com`
+  - Linked Frontend: `https://eventora-planning-fe.vercel.app/`
+
+
+  
+  
 
 
 
