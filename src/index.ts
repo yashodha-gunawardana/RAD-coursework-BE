@@ -8,6 +8,7 @@ import VendorRoutes from "./routes/vendorRoutes";
 import BookingRoutes from "./routes/bookingRoutes";
 import GuestRoutes from "./routes/guestRoutes";
 import BudgetRoutes from "./routes/budgetRoutes";
+import AIRoutes from "./routes/aiRoutes";
 import path from "path";
 import { authenticate } from "./middleware/authMiddleware";
 
@@ -40,6 +41,7 @@ app.use("/api/v1/vendors", authenticate, VendorRoutes)
 app.use("/api/v1/bookings", authenticate, BookingRoutes)
 app.use("/api/v1/guests", authenticate, GuestRoutes)
 app.use("/api/v1/budgets", authenticate, BudgetRoutes)
+app.use("/api/v1/ai", AIRoutes)
 
 
 mongoose.connect(MONGO_URL).then(() => {
