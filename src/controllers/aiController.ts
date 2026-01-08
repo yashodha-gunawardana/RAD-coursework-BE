@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { text } from "stream/consumers";
+import { error } from "console";
 
 
 // initialize google genearive AI with api key
@@ -39,5 +40,17 @@ export const eventConsultantAI = async (req: Request, res: Response) => {
       const result = await model.generateContent(prompt)
       const response = await result.response
       const text = response.text()
+
+      res.json({
+        success: true,
+        aiResponse: text
+      })
+  
+  } catch (err: any) {
+    console.error("AI service error: ", err)
+    return res.status(500).json({
+      message: "AI service is temporaily unavailable",
+      error: err.message
+    })
   }
 }
