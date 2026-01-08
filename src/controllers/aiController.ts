@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { text } from "stream/consumers";
 
 
 // initialize google genearive AI with api key
@@ -34,5 +35,9 @@ export const eventConsultantAI = async (req: Request, res: Response) => {
       5. Keep it practical and event-specific
       
       Format your response in a friendly, conversational tone.`
+
+      const result = await model.generateContent(prompt)
+      const response = await result.response
+      const text = response.text()
   }
 }
