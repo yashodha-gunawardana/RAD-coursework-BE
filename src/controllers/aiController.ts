@@ -10,5 +10,13 @@ export const eventConsultantAI = async (req: Request, res: Response) => {
   try {
 
     const { eventType, eventName, question } = req.body
+
+    if (!eventType || !question) {
+      return res.status(400).json({
+        message: "Event type and question are required"
+      })
+    }
+
+    const model = genAI.getGenerativeModel({ model: "gemini-pro"})
   }
 }
