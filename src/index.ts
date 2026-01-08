@@ -9,6 +9,7 @@ import BookingRoutes from "./routes/bookingRoutes";
 import GuestRoutes from "./routes/guestRoutes";
 import BudgetRoutes from "./routes/budgetRoutes";
 import path from "path";
+import { authenticate } from "./middleware/authMiddleware";
 
 
 dotenv.config();
@@ -19,10 +20,10 @@ const MONGO_URL = process.env.MONGO_URL as string
 const app = express();
 
 // json data parse in incoming requests
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
 
-app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")))
 
 
 app.use(cors({
@@ -33,11 +34,12 @@ app.use(cors({
 
 // mount routes
 app.use("/api/v1/auth", AuthRoutes)
-app.use("/api/v1/events", EventRoutes)
-app.use("/api/v1/vendors", VendorRoutes)
-app.use("/api/v1/bookings", BookingRoutes)
-app.use("/api/v1/guests", GuestRoutes)
-app.use("/api/v1/budgets", BudgetRoutes)
+
+app.use("/api/v1/events", authenticate, EventRoutes)
+app.use("/api/v1/vendors", authenticate, VendorRoutes)
+app.use("/api/v1/bookings", authenticate, BookingRoutes)
+app.use("/api/v1/guests", authenticate, GuestRoutes)
+app.use("/api/v1/budgets", authenticate, BudgetRoutes)
 
 
 mongoose.connect(MONGO_URL).then(() => {

@@ -18,6 +18,11 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
 
         const { userId, name, category, contact, priceRange, description, isAvailable } = req.body
 
+        if (!userId) {
+            return res.status(400).json({
+                message: "userId is required when creating a vendor"
+            })
+        }
 
         const user = await User.findById(userId)
 
@@ -47,7 +52,16 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
             image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`
         }
 
+        // prevent duplicate vendor for same user
+        const existingVendor = await Vendor.findOne({ userId })
+        if (existingVendor) {
+            return res.status(400).json({
+                message: "This user already has a vendor profile"
+            })
+        }
+
         const newVendor = new Vendor({
+            userId: userId,
             name,
             category,
             contact,
@@ -57,9 +71,11 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
             isAvailable: isAvailable !== undefined
                 ? isAvailable === "true" || isAvailable === true
                 : true,
-            addedBy: req.user._id // track which admin added the vendor
+            addedBy: req.user._id     
         })
+
         await newVendor.save()
+
 
         return res.status(201).json({
             message: "Vendor created successfully..",
@@ -74,69 +90,57 @@ export const createVendor = async (req: AuthRequest, res: Response) => {
     }
 }
 
-// Get vendor by logged-in user
-/*export const getVendorByUserId = async (req: AuthRequest, res: Response) => {
-    try {
-        const vendor = await Vendor.findOne({ addedBy: req.user?._id }).populate("addedBy", "name email");
 
-        if (!vendor) {
-            return res.status(404).json({ message: "Vendor not found for this user" });
-        }
-
-        return res.status(200).json({ success: true, data: vendor });
-    } catch (err: any) {
-        console.error("Error fetching vendor by user:", err);
-        return res.status(500).json({ message: err?.message });
-    }
-};*/
-// vendorController.ts - getVendorByUserId function
+// get vendor by logged-in user
 export const getVendorByUserId = async (req: AuthRequest, res: Response) => {
     try {
-        console.log("getVendorByUserId called for user:", req.user);
+
+        console.log("getVendorByUserId called for user:", req.user)
         
         if (!req.user?._id) {
             return res.status(401).json({
                 message: "User not authenticated"
-            });
+            })
         }
 
-        // Find vendor by the logged-in user's ID
+        // find vendor by the logged-in user's ID
         const vendor = await Vendor.findOne({ 
-            addedBy: req.user._id 
-        }).populate("addedBy", "fullname email");
+            userId: req.user._id 
+        })
+        .populate("addedBy", "fullname email")
+
 
         if (!vendor) {
-            // For create form, it's OK if no vendor exists
             return res.status(200).json({
                 success: true,
-                data: null  // Explicitly return null
-            });
+                data: null  
+            })
         }
 
         return res.status(200).json({
             success: true,
             data: vendor
-        });
+        })
 
     } catch (err: any) {
-        console.error("Error in getVendorByUserId:", err);
+        console.error("Error in getVendorByUserId:", err)
         return res.status(500).json({
             message: err?.message || "Internal server error"
-        });
+        })
     }
-};
+}
 
 
 // get all vendors function (public)
 export const getAllVendors = async (req: AuthRequest, res: Response) => {
     try {
 
-        const page = Math.max(parseInt(req.query.page as string) || 1, 1);
-        const limit = Math.max(parseInt(req.query.limit as string) || 6, 1);
-        const skip = (page - 1) * limit;
+        const page = Math.max(parseInt(req.query.page as string) || 1, 1)
+        const limit = Math.max(parseInt(req.query.limit as string) || 6, 1)
+        const skip = (page - 1) * limit
 
 
-        const filter: any = {};
+        const filter: any = {}
 
         if (req.query.search) {
             filter.$or = [
@@ -183,13 +187,24 @@ export const getAllVendors = async (req: AuthRequest, res: Response) => {
 
 
 // get vendor by id function (public)
-/*export const getVendorById = async (req: AuthRequest, res: Response) => {
+export const getVendorById = async (req: Request, res: Response) => {
     try {
-        const vendor = await Vendor.findById(req.params.id).select("-addedBy")
+
+        const { id } = req.params
+        
+        // validate ObjectId
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: "Invalid vendor ID format"
+            })
+        }
+
+        const vendor = await Vendor.findById(id)
+            .populate("addedBy", "fullname email")
 
         if (!vendor) {
             return res.status(404).json({
-                message: "Vendor not found.."
+                message: "Vendor not found"
             })
         }
 
@@ -201,42 +216,10 @@ export const getAllVendors = async (req: AuthRequest, res: Response) => {
     } catch (err: any) {
         console.error("Get vendor by ID error:", err)
         return res.status(500).json({
-            message: err?.message
+            message: err?.message || "Internal server error"
         })
     }
-}*/
-export const getVendorById = async (req: Request, res: Response) => {
-    try {
-        const { id } = req.params;
-        
-        // Validate ObjectId
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({
-                message: "Invalid vendor ID format"
-            });
-        }
-
-        const vendor = await Vendor.findById(id)
-            .populate("addedBy", "fullname email");
-
-        if (!vendor) {
-            return res.status(404).json({
-                message: "Vendor not found"
-            });
-        }
-
-        return res.status(200).json({
-            success: true,
-            data: vendor
-        });
-
-    } catch (err: any) {
-        console.error("Get vendor by ID error:", err);
-        return res.status(500).json({
-            message: err?.message || "Internal server error"
-        });
-    }
-};
+}
 
 
 // update vendor function (only admin)'
@@ -275,12 +258,11 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
             vendor.image = undefined
 
         } else if (req.file) {
-            // New image uploaded
             vendor.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`
         }
         
-
         await vendor.save()
+
 
         return res.status(201).json({
             message: "Vendor updated successfully..",
@@ -296,6 +278,7 @@ export const updateVendor = async (req: AuthRequest, res: Response) => {
 }
 
 
+// get vendor own profile
 export const getOwnVendorProfile = async (req: AuthRequest, res: Response) => {
     try {
 
@@ -324,6 +307,7 @@ export const getOwnVendorProfile = async (req: AuthRequest, res: Response) => {
         })
     }
 }
+
 
 // vendor update own profile
 export const updateOwnVendorProfile = async (req: AuthRequest, res: Response) => {
@@ -355,7 +339,7 @@ export const updateOwnVendorProfile = async (req: AuthRequest, res: Response) =>
         }
 
         if (req.file) {
-            vendor.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+            vendor.image = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`
         }
 
         await vendor.save()
@@ -407,19 +391,23 @@ export const deleteVendor = async (req: AuthRequest, res: Response) => {
 }
 
 
-// for dropdown 
-export const getAllVendorsForSelect = async (req: AuthRequest, res: Response) => {
+// for dropdown select vendors
+export const getAllVendorsForSelect = async (req: Request, res: Response) => {
     try {
         
+        console.log("Dropdown called for selct vendors")
+
         const vendors = await Vendor.find({ isAvailable: true })
             .select("_id name category image priceRange")
-            .sort({ name: 1 });
+            .sort({ name: 1 })
+
         
         return res.status(200).json({
             success: true,
             count: vendors.length,
             data: vendors
         })
+        
     } catch (err: any) {
         console.error("Get vendors for dropdown error:", err)
         res.status(500).json({ 

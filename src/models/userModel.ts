@@ -13,6 +13,7 @@ export enum VendorStatus {
     REJECTED = "REJECTED"
 }
 
+
 // TypeScript structure
 export interface IUser extends Document {
     _id: mongoose.Types.ObjectId
@@ -21,6 +22,7 @@ export interface IUser extends Document {
     password: string
     roles: Role[]  // array of roles assigned to user
     vendorStatus: VendorStatus
+    createdAt: Date
 }
 
 // Database structure

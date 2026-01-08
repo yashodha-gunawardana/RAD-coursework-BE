@@ -13,6 +13,7 @@ export enum VendorCategory {
 
 // TypeScript structure
 export interface IVendor extends Document {
+    userId: mongoose.Types.ObjectId
     name: string
     category: VendorCategory
     contact: string
@@ -28,6 +29,7 @@ export interface IVendor extends Document {
 // Database structure
 const vendorSchema = new Schema<IVendor> (
     {
+        userId: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
         name: { type: String, required: true, trim: true },
         category: { type: String, enum: Object.values(VendorCategory), required: true },
         contact: { type: String, required: true },

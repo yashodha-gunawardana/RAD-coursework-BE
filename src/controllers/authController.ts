@@ -5,6 +5,7 @@ import { signAccessToken } from "../utils/tokens";
 import { AuthRequest } from "../middleware/authMiddleware";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/email";
+import Vendor, { VendorCategory } from "../models/vendorModel";
 
 
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
@@ -13,40 +14,43 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET as string
 // register user function
 export const registerUser = async (req: Request, res: Response) => {
     try {
-        const { fullname, email, password} = req.body;
+
+        const { fullname, email, password} = req.body
 
         if (!fullname || !email || !password) {
             return res.status(400).json({
                 message: "All fields are required.."
             })
         }
-
-        // only user and vendor roles allowed at registration
-       /* if (role !== Role.USER && role !== Role.VENDOR) {
-            return res.status(400).json({
-                message: "Invalid role. Only USER or VENDOR allowed during registration."
-            })
-        }*/
     
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email })
         if (existingUser) {
             return res.status(400).json({
                 message: "Email already exists.."
             })
         }
 
-        const hashedPassowrd = await bcrypt.hash(password, 10);
+        const hashedPassowrd = await bcrypt.hash(password, 10)
 
         const newUser = new User({
             fullname,
             email,
             password: hashedPassowrd,
-            // address,
-            // phone,
             roles: [Role.USER],
             vendorStatus: VendorStatus.NOT_REQUESTED
         })
-        await newUser.save();
+        await newUser.save()
+
+        try {
+            await sendEmail(
+                newUser.email,
+                "Welcome to Eventora",
+                `Hi ${newUser.fullname},\n\nWelcome to Eventora! You can now log in and book events.`
+            )
+
+        } catch (err) {
+            console.error("Welcome email failed:", err)
+        }
 
         res.status(201).json({
             message: "Registration successfull..You can now log in.",
@@ -113,7 +117,7 @@ export const loginUser = async (req: Request, res: Response) => {
         })
 
     } catch (err: any) {
-        console.error("Login error:", err);
+        console.error("Login error:", err)
         res.status(500).json({
             message: err?.message
         })
@@ -124,6 +128,7 @@ export const loginUser = async (req: Request, res: Response) => {
 // get own details function
 export const getMyDetails = async (req: AuthRequest, res: Response) => {
     try {
+
         if (!req.user?._id) {
             return res.status(401).json({
                 message: "Unauthorized.."
@@ -131,7 +136,7 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
         }
 
         // req.user._id is now properly set by authMiddleware
-        const user = await User.findById(req.user._id).select("-password");
+        const user = await User.findById(req.user._id).select("-password")
 
         if (!user) {
             return res.status(404).json({
@@ -148,10 +153,10 @@ export const getMyDetails = async (req: AuthRequest, res: Response) => {
                 roles: user.roles,
                 approved: user.vendorStatus
             }
-        });
+        })
 
     } catch (err: any) {
-        console.error("Get my details error:", err);
+        console.error("Get my details error:", err)
         res.status(500).json({
             message: err?.message || "Server error"
         });
@@ -191,6 +196,23 @@ export const requestVendor = async (req: AuthRequest, res: Response) => {
         user.vendorStatus = VendorStatus.PENDING
         await user.save()
 
+
+         // notify admins about new vendor request
+        try {
+            const admins = await User.find({ roles: Role.ADMIN })
+
+            for (const admin of admins) {
+                await sendEmail(
+                    admin.email,
+                    "New Vendor Request",
+                    `${user.fullname} has requested to become a vendor. Please review the request.`
+                )
+            }
+
+        } catch (err) {
+            console.error("Admin notification email failed:", err)
+        }
+
         res.status(200).json({
             message: "Vendor request sumbitted successfully, Awaiting admin approval.",
             data: { VendorStatus: user.vendorStatus }
@@ -208,7 +230,31 @@ export const requestVendor = async (req: AuthRequest, res: Response) => {
 // get all users
 export const getAllUsers = async (req: AuthRequest, res: Response) => {
     try {
-        const users = await User.find({}).select("-password")
+
+        if (!req.user?.roles.includes(Role.ADMIN)) {
+            return res.status(403).json({
+                message: "Only admins can access this resource"
+            })
+        }
+
+        const page = Math.max(parseInt(req.query.page as string) || 1, 1)
+        const limit = Math.max(parseInt(req.query.limit as string) || 6, 1)
+        const skip = (page - 1) * limit
+
+
+        const totalUsers = await User.countDocuments()
+
+        const admins = await User.countDocuments({ roles: Role.ADMIN })
+        const vendors = await User.countDocuments({ roles: Role.VENDOR })
+        const pending = await User.countDocuments({ vendorStatus: VendorStatus.PENDING })
+
+
+        const users = await User.find({})
+            .sort({ createdAt: -1 }) 
+            .skip(skip)
+            .limit(limit)
+            .select("-password")
+
 
         const formattedUsers = users.map(user => ({
             _id: user._id,
@@ -216,13 +262,25 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
             email: user.email,
             roles: user.roles,
             vendorStatus: user.vendorStatus,
-            
-        }));
+            createdAt: user.createdAt
+
+        }))
 
         res.status(200).json({
-            message: "Users fetched successfully",
+            success: true,
+            page,
+            limit,
+            totalItems: totalUsers,          
+            totalPages: Math.ceil(totalUsers / limit),
+            count: formattedUsers.length,  
+            stats: {
+                totalUsers,
+                admins,
+                vendors,
+                pending
+            },
             data: formattedUsers
-        });
+        })
 
     } catch (err: any) {
         console.error("Get all users error:", err)
@@ -232,49 +290,67 @@ export const getAllUsers = async (req: AuthRequest, res: Response) => {
     }
 }
 
-
-// approved vendor request
-/*export const approveVendor = async (req: AuthRequest, res: Response) => {
+      
+// approve vendor request (admin only)
+export const approveVendor = async (req: AuthRequest, res: Response) => {
     try {
 
         if (!req.user?.roles.includes(Role.ADMIN)) {
             return res.status(403).json({ 
-                message: "Only admin can approv vendor request"
-             })
+                message: "Only admin can approve vendors" 
+            })
         }
 
-        const { id } = req.params
-
-        const user = await User.findById(id)
+        const user = await User.findById(req.params.id)
         if (!user) {
-            return res.status(404).json({
-                message: "User not found."
+            return res.status(404).json({ 
+                message: "User not found" 
             })
         }
 
         if (user.vendorStatus !== VendorStatus.PENDING) {
             return res.status(400).json({ 
-                message: "No pending vendor request for this user" 
+                message: "No pending vendor request" 
             })
         }
 
-
-        // vendor role approve
+        // add VENDOR role if not already present.
         if (!user.roles.includes(Role.VENDOR)) {
-            user.roles.push(Role.VENDOR)
+            user.roles.push(Role.VENDOR);
         }
 
         user.vendorStatus = VendorStatus.APPROVED
         await user.save()
 
-        await sendEmail(
-            user.email,
-            "Vendor Requset Approved",
-            `Congratulations, ${user.fullname}! Your request to become a vendor has been approved.
-                You now have full access to vendor features.`
-        )
-        res.status(200).json({
-            message: "Vendor request approved successfully"
+        // create vendor profile automatically upon approval.
+        const newVendor = new Vendor({
+            name: user.fullname,  
+            category: VendorCategory.OTHER,  
+            contact: user.email,  
+            priceRange: "Contact for pricing",  
+            description: "Vendor profile auto-created upon approval.",  
+            isAvailable: true,  
+            addedBy: req.user._id,  
+            userId: user._id  
+        })
+
+        await newVendor.save()
+
+
+        // send approval email 
+        try {
+            await sendEmail(
+                user.email,
+                "Vendor Request Approved",
+                `Dear ${user.fullname},\n\nYour request to become a vendor has been approved!\nYou can now access vendor features.`
+            )
+
+        } catch (err) {
+            console.error("Approval email failed for:", user.email, err)
+        }
+
+        res.status(200).json({ 
+            message: "Vendor approved successfully" 
         })
 
     } catch (err) {
@@ -292,8 +368,8 @@ export const rejectVendor = async (req: AuthRequest, res: Response) => {
 
         if (!req.user?.roles.includes(Role.ADMIN)) {
             return res.status(403).json({ 
-                message: "Only admin can reject vendor request"
-             })
+                message: "Only admin can reject vendor request" 
+            })
         }
 
         const { id } = req.params
@@ -311,20 +387,24 @@ export const rejectVendor = async (req: AuthRequest, res: Response) => {
             })
         }
 
-
-        // remove vendor role rejection
         user.vendorStatus = VendorStatus.REJECTED
         await user.save()
 
-        
-        await sendEmail(
-            user.email,
-            "Vendor Request Rejected",
-            `Dear ${user.fullname}, unfortunately your request to become a vendor has been rejected. 
-                Please contact support for more information.`
-        )
+
+        // send rejection email
+        try {
+            await sendEmail(
+                user.email,
+                "Vendor Request Rejected",
+                `Dear ${user.fullname},\n\nUnfortunately, your request to become a vendor has been rejected.\nPlease contact support for more information.`
+            )
+
+        } catch (err) {
+            console.error("Rejection email failed for:", user.email, err);
+        }
+
         res.status(200).json({ 
-            message: "Vendor request rejected" 
+            message: "Vendor request rejected successfully"
         })
 
     } catch (err) {
@@ -333,118 +413,14 @@ export const rejectVendor = async (req: AuthRequest, res: Response) => {
             message: "Server error" 
         })
     }
-}*/
-// approved vendor request
-export const approveVendor = async (req: AuthRequest, res: Response) => {
-    try {
-        if (!req.user?.roles.includes(Role.ADMIN)) {
-            return res.status(403).json({ 
-                message: "Only admin can approve vendor request" 
-            });
-        }
-
-        const { id } = req.params;
-
-        const user = await User.findById(id);
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found."
-            });
-        }
-
-        if (user.vendorStatus !== VendorStatus.PENDING) {
-            return res.status(400).json({ 
-                message: "No pending vendor request for this user" 
-            });
-        }
-
-        // Add VENDOR role if not already present
-        if (!user.roles.includes(Role.VENDOR)) {
-            user.roles.push(Role.VENDOR);
-        }
-
-        user.vendorStatus = VendorStatus.APPROVED;
-        await user.save();
-
-        // Send email — failure won't crash the approval
-        try {
-            await sendEmail(
-                user.email,
-                "Vendor Request Approved", // ← Fixed typo
-                `Congratulations, ${user.fullname}!\n\nYour request to become a vendor has been approved.\nYou now have full access to vendor features.`
-            );
-        } catch (emailErr) {
-            console.error("Approval email failed for:", user.email, emailErr);
-        }
-
-        res.status(200).json({
-            message: "Vendor request approved successfully"
-        });
-
-    } catch (err) {
-        console.error("Approve vendor error:", err);
-        res.status(500).json({ 
-            message: "Server error" 
-        });
-    }
-};
-
-// reject vendor request
-export const rejectVendor = async (req: AuthRequest, res: Response) => {
-    try {
-        if (!req.user?.roles.includes(Role.ADMIN)) {
-            return res.status(403).json({ 
-                message: "Only admin can reject vendor request" 
-            });
-        }
-
-        const { id } = req.params;
-
-        const user = await User.findById(id);
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            });
-        }
-
-        if (user.vendorStatus !== VendorStatus.PENDING) {
-            return res.status(400).json({ 
-                message: "No pending vendor request for this user" 
-            });
-        }
-
-        user.vendorStatus = VendorStatus.REJECTED;
-        await user.save();
-
-        // Send rejection email — safe from failure
-        try {
-            await sendEmail(
-                user.email,
-                "Vendor Request Rejected",
-                `Dear ${user.fullname},\n\nUnfortunately, your request to become a vendor has been rejected.\nPlease contact support for more information.`
-            );
-        } catch (emailErr) {
-            console.error("Rejection email failed for:", user.email, emailErr);
-        }
-
-        res.status(200).json({ 
-            message: "Vendor request rejected successfully"
-        });
-
-    } catch (err) {
-        console.error("Reject vendor error:", err);
-        res.status(500).json({ 
-            message: "Server error" 
-        });
-    }
 };
 
 
 // delete users
 export const deleteUser = async (req: AuthRequest, res: Response) => {
     try {
-        const { id } = req.params
 
+        const { id } = req.params
 
         if (!req.user?.roles.includes(Role.ADMIN)) {
             return res.status(403).json({
@@ -489,7 +465,7 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
 // refresh token & generate a new access token function
 export const handleRefreshToken = async (req: AuthRequest, res: Response) => {
     try {
-        // get the refresh token sent by the client
+        
         const { token: refreshToken } = req.body
 
         if (!refreshToken) {
@@ -498,11 +474,10 @@ export const handleRefreshToken = async (req: AuthRequest, res: Response) => {
             })
         }
 
-        // Verify the token using JWT_REFRESH_SECRET
-        // jwt.verify will decode the token and check its validity
+        // verify the token using JWT_REFRESH_SECRET
         const payload = jwt.verify(refreshToken, JWT_REFRESH_SECRET)
 
-         // Find user in database by ID from token payload
+        // find user in database by ID from token payload
         const user = await User.findById(payload.sub)
 
         if (!user) {

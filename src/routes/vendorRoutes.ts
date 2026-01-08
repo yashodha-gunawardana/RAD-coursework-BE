@@ -21,26 +21,24 @@ const router = Router();
 
 // public
 router.get("/", getAllVendors)
+router.get("/dropdown", getAllVendorsForSelect)
 
-// public
-router.get("/:id", getVendorById)
 
-// Get vendor details for the logged-in vendor
-router.get("/by-user", authenticate, getVendorByUserId);
-
-router.get("/dropdown", authenticate, getAllVendorsForSelect)
+// get vendor details for the logged-in vendor
+router.get("/by-user", authenticate, getVendorByUserId)
 
 // self
 router.get("/me", authenticate, getOwnVendorProfile)
 router.put("/me", authenticate, uploadImage, handleMulterError, updateOwnVendorProfile)
 
+// public
+router.get("/:id", getVendorById)
+
+
 // admin only
 router.post("/", authenticate, requiredRole([Role.ADMIN]), uploadImage, handleMulterError, createVendor)
 router.put("/:id", authenticate, requiredRole([Role.ADMIN]), uploadImage, handleMulterError, updateVendor)
 router.delete("/:id", authenticate, requiredRole([Role.ADMIN]), deleteVendor)
-
-
-
 
 
 export default router

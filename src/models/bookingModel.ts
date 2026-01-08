@@ -21,6 +21,7 @@ export interface IBooking extends Document {
         quantity: number
     }[]
     totalPrice?: number
+    
 }
 
 // Database structure
