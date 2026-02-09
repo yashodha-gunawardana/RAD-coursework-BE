@@ -1,5 +1,4 @@
-<<<<<<< HEAD
-=======
+
 # 🎉 Eventora  - Event Planning & Booking System 
 
 ## 📌 Project Overview
