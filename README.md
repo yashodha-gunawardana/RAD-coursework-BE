@@ -340,4 +340,4 @@ The frontend follows Rapid Application Development (RAD) principles with reusabl
   
       
 
->>>>>>> c9dcc224093c9c4a7723aa0a9a44744dc1a25a88
+
